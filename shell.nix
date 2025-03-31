@@ -113,6 +113,7 @@ pkgs.mkShell {
 	   createdb db -h "$(pwd)"
 
       fi
+      cd ../../
     '';
 }
     
