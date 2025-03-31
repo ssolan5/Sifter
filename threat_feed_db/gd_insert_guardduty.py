@@ -3,6 +3,41 @@ import os
 import pdb
 from typing import TypedDict
 
+class ResourceRecord(TypedDict, total=True):
+    
+    instance_id: str
+    instance_type: str
+    vpc_id: list
+    public_ip: list
+    network_interfaces: dict
+    access_key_details: dict
+
+
+class AwsApiCallActionRecord(TypedDict, total=True):
+
+    api_name: str
+    caller_type: str
+    error_code: str
+    remote_ip_details: dict
+    service_name: str
+    affected_resources: dict
+
+
+class ActionRecord(TypedDict, total=True):
+
+    action_type: str
+    aws_api_call_action: AwsApiCallActionRecord
+
+    
+class ServiceRecord(TypedDict, total=True):
+     
+    action: ActionRecord
+    evidence: dict
+    archived: bool
+    resource_role: str
+    service_name: str
+ 
+
 class JSONRecord(TypedDict, total=True):
     
     account_id: str
@@ -17,24 +52,6 @@ class JSONRecord(TypedDict, total=True):
     service: ServiceRecord
     additional_data: dict
 
-class ResourceRecord(TypedDict, total=True):
-    
-    instance_id: str
-    instance_type: str
-    vpc_id: list
-    public_ip: list
-    network_interfaces: dict
-    access_key_details: dict
-
-
-class ServiceRecord(TypedDict, total=True):
-     
-    action: ActionRecord
-    evidence: dict
-    archived: bool
-    resource_role: str
-    service_name: str
-    
 
 
 
