@@ -1,6 +1,7 @@
 let
    # Tried to follow documentation on shell.nix of nix's own docs and the packages
    # in this tarball were outdated
+   
    # nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/tarball/nixos-24.05";
 
    pkgs = import <nixpkgs> {}; 
@@ -36,11 +37,7 @@ pkgs.mkShell {
             cd threat_feed_db
             uv add psycopg2-binary
  
-            # Don't need to add that because python3 standard 
-            # library already has that
-            # uv add json
-
-            # exiting out of the uv repo after adding dependencies
+            # Exiting out of the uv repo after adding dependencies
 	    cd ..
  
 
@@ -52,7 +49,7 @@ pkgs.mkShell {
 
       echo $GREETING | cowsay -f hellokitty | lolcat
  
-      # Cloning the sample alerts json repo
+      # Cloning the Guard Duty sample alerts json repo
  
       if test -d "$ALERTS_REPO"; then 
 
@@ -65,6 +62,7 @@ pkgs.mkShell {
       fi
 
       # Initializing the database
+      
       # Adapting https://mgdm.net/weblog/postgresql-in-a-nix-shell/
       # for shell hook
 
@@ -80,10 +78,14 @@ pkgs.mkShell {
           if [[ $(ls -al .s.PGSQL.5432) ]]; then
 
 	      echo "Socket file exists, need to clean up; stop and start server " | cowsay -f hellokitty | lolcat 
-              # need to make a check here with pg_ctl status
+              
+              # TODO: Need to make a check here with pg_ctl status
 
-              # if server is already started 
+              # If server has already started then stop it 
               pg_ctl -D . stop
+              
+              # Restart the server as socket may or may not 
+              # be stuck anymore
               pg_ctl -D . -l logfile -o "--unix_socket_directories='$PWD'" start
 
               echo "Server should be started now?1?!?!?" | cowsay -f hellokitty | lolcat
@@ -102,18 +104,23 @@ pkgs.mkShell {
           # Initializing database files
           initdb -D .
  
-          # check if that port is not already being used for PGSQL 
+          # Check if that port is not already being used for PGSQL 
           # connections or a remnant from before -- test runs  
 
           echo "PostgreSQL Server starting ! !! was not on previously " | cowsay -f hellokitty | lolcat 
 
-	   # starts a server 
+	   # Starts a PostGreSQL server 
 	   pg_ctl -D . -l logfile -o "--unix_socket_directories='$PWD'" start
-	   # intialize my database "db" in database
+	   
+           # Intialize my database "db" in database
 	   createdb db -h "$(pwd)"
 
       fi
-      cd ../../
+
+      # Once the database is initialized and status checked
+      # move out of the directory to the python repo
+
+      cd ../../threat_feed_db
     '';
 }
     
