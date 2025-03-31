@@ -53,15 +53,12 @@ class JSONRecord(TypedDict, total=True):
     additional_data: dict
 
 
-
-
 class JSONParser():
 
-    # This class handles parsing the JSON file into
-    # TypedDictionaries that are then inserted into
-    # the PostGreSQL database after validating. 
+    # This class handles parsing the JSON file into TypedDictionaries that 
+    # are then inserted into the PostGreSQL database after validating. 
 
- 
+
     def __init__ (self,file_path):
 
         self.file_path = file_path
@@ -77,13 +74,12 @@ class JSONParser():
 
  
     def prepare_json(self,record_item,json_record):
+
+        # This method iterates over the dictionary, per each tuple 
+        # and populates individual JSONRecord for the relevant JSON object  
  
 
-        # Each record_item is a key value pair in
-        # one individual JSON object in the JSON file 
-        # provided.
-
-        # For debugging purposes:
+        # For debugging purposes --
         # print(type(record_item))
         # print(str(record_item))
  
@@ -125,10 +121,10 @@ class JSONParser():
 
                 resource_dict = dict(record_item[1])
 
-                # Shifting functionality for parsing the Resource 
-                # elsewhere, this is standin code for it currently.
+                # TODO: Shift functionality for parsing the Resource 
+                # elsewhere, this is stand-in code for it currently.
 
-                # For debugging purposes
+                # For debugging purposes --
                 # breakpoint()
 
                 if self.check_key(resource_dict,"InstanceDetails"):
@@ -144,23 +140,27 @@ class JSONParser():
         with open(self.file_path, "r") as file:
  
             self.json_dict = json.load(file)
+
+            # For debugging purposes -- 
             # print(json.dumps(guard_duty_json, indent= 4))
 
-            # for loop for each record
             for record in self.json_dict:
  
                 # print(json.dumps(record, indent= 4))
-                # create a JSONRecord type here pertaining to one record
-                # pass it to the prepare_json function and it iterates
-                # over the dictionary, per each tuple and fills up the JSONRecord 
- 
+
                 json_record = JSONRecord()
                 # print(json_record)
  
+                # Create a JSONRecord type here pertaining to one JSON
+                # object and pass it to the prepare_json method. 
+                # Each item here is a key value pair (<class 'tuple'>) for
+                # one individual JSON object in the JSON file provided.
+
                 dict(filter(lambda item: self.prepare_json(item,json_record),record.items()))
+                
+                # Appending the JSONRecord to the main list after populating
                 self.json_record_list.append(json_record)
 
-                # append the JSONRecord to the main list after
 
             for item in self.json_record_list:
                 print(item)
