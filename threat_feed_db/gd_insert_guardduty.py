@@ -4,7 +4,7 @@ import pdb
 from typing import TypedDict
 
 class ResourceRecord(TypedDict, total=True):
-    
+ 
     instance_id: str
     instance_type: str
     vpc_id: list
@@ -28,9 +28,9 @@ class ActionRecord(TypedDict, total=True):
     action_type: str
     aws_api_call_action: AwsApiCallActionRecord
 
-    
+ 
 class ServiceRecord(TypedDict, total=True):
-     
+ 
     action: ActionRecord
     evidence: dict
     archived: bool
@@ -39,7 +39,7 @@ class ServiceRecord(TypedDict, total=True):
  
 
 class JSONRecord(TypedDict, total=True):
-    
+ 
     account_id: str
     region: str
     created_at: str
@@ -57,10 +57,11 @@ class JSONRecord(TypedDict, total=True):
 
 class JSONParser():
 
-    # now define a list of the typeddict here 
-    # or in init
+    # This class handles parsing the JSON file into
+    # TypedDictionaries that are then inserted into
+    # the PostGreSQL database after validating. 
 
-    
+ 
     def __init__ (self,file_path):
 
         self.file_path = file_path
@@ -74,21 +75,22 @@ class JSONParser():
         else:
             return False
 
-    
+ 
     def prepare_json(self,record_item,json_record):
-        
+ 
 
-        # Each record_item would be a key value pair
-        # We create a switch case to fill up one
-        # JSONRecord item 
-       
+        # Each record_item is a key value pair in
+        # one individual JSON object in the JSON file 
+        # provided.
+
+        # For debugging purposes:
         # print(type(record_item))
         # print(str(record_item))
-         
+ 
         match record_item[0]:
 
             case "AccountId":
-                
+
                 json_record["account_id"] = record_item[1] 
 
             case "Region": 
@@ -107,20 +109,6 @@ class JSONParser():
 
                 json_record["severity"] = record_item[1]
 
-            case "Resource":
-
-                resource_dict = dict(record_item[1])
-
-                # print(str(resource_dict.keys()))
-                # breakpoint()
-
-                if self.check_key(resource_dict,"InstanceDetails"):
-                    json_record["instance_id"]=resource_dict["InstanceDetails"]["InstanceId"]
-                    json_record["instance_type"]=resource_dict["InstanceDetails"]["InstanceType"]
-
-                    if self.check_key(resource_dict,"NetworkInterfaces"):
-                        json_record["public_ip"]=resource_dict["InstanceDetails"]["NetworkInterfaces"][0]["PublicIp"]
-
             case "Title":
 
                 json_record["title"] = record_item[1]
@@ -133,9 +121,26 @@ class JSONParser():
 
                 json_record["record_type"] = record_item[1]
 
+            case "Resource":
+
+                resource_dict = dict(record_item[1])
+
+                # Shifting functionality for parsing the Resource 
+                # elsewhere, this is standin code for it currently.
+
+                # For debugging purposes
+                # breakpoint()
+
+                if self.check_key(resource_dict,"InstanceDetails"):
+                    json_record["instance_id"]=resource_dict["InstanceDetails"]["InstanceId"]
+                    json_record["instance_type"]=resource_dict["InstanceDetails"]["InstanceType"]
+
+                    if self.check_key(resource_dict,"NetworkInterfaces"):
+                        json_record["public_ip"]=resource_dict["InstanceDetails"]["NetworkInterfaces"][0]["PublicIp"]
+
  
     def read_from_file(self):
-        
+ 
         with open(self.file_path, "r") as file:
  
             self.json_dict = json.load(file)
@@ -148,10 +153,10 @@ class JSONParser():
                 # create a JSONRecord type here pertaining to one record
                 # pass it to the prepare_json function and it iterates
                 # over the dictionary, per each tuple and fills up the JSONRecord 
-                
+ 
                 json_record = JSONRecord()
                 # print(json_record)
-                
+ 
                 dict(filter(lambda item: self.prepare_json(item,json_record),record.items()))
                 self.json_record_list.append(json_record)
 
@@ -164,36 +169,26 @@ class JSONParser():
 
 class ArgumentParser:
 
-    # add argument options here
-    # takes an argumentparser object
+    # Adding some argument options here
+    # takes an argumentparser object, but
+    # have not decided upon options provided.
     
     def setup_arguments(parser):
-        # set up the options here 
-        # including the help
+        # Set up of command line options here 
+        # including the help description
 
-    def 
 
 
 class SQL_DB:
 
-    # we do the connection to the database
-    # in this class, i would like to make it so
-    # that the connection is available to all
-    # instances of the sql_db class
+    # This class handles connection to the PostGreSQL
+    # database. Database connection is made available to all
+    # instances of the SQL_DB class; need to consider setup
     
-    database_creds
-    database_port
-    database_host
-    database_connection
-
-    # wondering if it would be good to use a 
-    # typeddict for defining each individual sql records 
-    # object for insertion; the difficulty would be in 
-    # unwrapping and placing it in the parameterized queries
-    # so whatever is the easiest way to refer to each 
-    # individual column in the record while writing the sql 
-    # query which is then passed to the sql insert wrapper
-    # provided by the postgres connector library
+    # database_creds
+    # database_port
+    # database_host
+    # database_connection
 
     def __init__():
 
@@ -201,7 +196,9 @@ class SQL_DB:
 
 
     def  write_to_sql_db(self):
-    # the json records to this class
+    # The TypedDict records are to be passed to 
+    # this method and it handles writing to the
+    # database.
 
 
     def read_from_sql_db(self):
@@ -213,8 +210,8 @@ def main():
     jsonparse = JSONParser("../GuarddutyAlertsSampleData/Guardduty Sample Alert Data.json")
     jsonparse.read_from_file()
     
-    # handle the text based UI interface from here for querying 
+    # TODO: Handle the text based UI interface here for SQL querying and printing results. 
 
-   
+ 
 if __name__ == "__main__":
     main()
