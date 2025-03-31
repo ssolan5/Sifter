@@ -25,6 +25,7 @@ pkgs.mkShell {
     ];
  
     GREETING = " Hello World!! ^--^ !! ! ";
+    ALERTS_REPO="GuarddutyAlertsSampleData/";
 
     shellHook = ''
 
@@ -53,8 +54,6 @@ pkgs.mkShell {
  
       # Cloning the sample alerts json repo
  
-      ALERTS_REPO="GuarddutyAlertsSampleData/"  
-
       if test -d "$ALERTS_REPO"; then 
 
           echo "GuarddutyAlertsSampleData exists!" | cowsay -f hellokitty | lolcat
