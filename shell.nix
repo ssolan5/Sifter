@@ -28,11 +28,11 @@ pkgs.mkShell {
 
     shellHook = ''
 
-      COMMAND_OUTPUT=$(uv init threat-feed-db 2>&1)
+      COMMAND_OUTPUT=$(uv init threat_feed_db 2>&1)
 
       if [[ $? -eq 0 ]]; then
  
-            cd threat-feed-db
+            cd threat_feed_db
             uv add psycopg2-binary
  
             # Don't need to add that because python3 standard 
