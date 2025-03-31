@@ -146,6 +146,7 @@ class JSONParser():
 
             for record in self.json_dict:
  
+                # For debugging purposes --
                 # print(json.dumps(record, indent= 4))
 
                 json_record = JSONRecord()
@@ -162,6 +163,7 @@ class JSONParser():
                 self.json_record_list.append(json_record)
 
 
+
             for item in self.json_record_list:
                 print(item)
 
@@ -169,19 +171,20 @@ class JSONParser():
 
 class ArgumentParser:
 
-    # Adding some argument options here
+    # TODO: Adding some argument options here
     # takes an argumentparser object, but
     # have not decided upon options provided.
     
     def setup_arguments(parser):
-        # Set up of command line options here 
+
+        # TODO: Set up of command line options here 
         # including the help description
 
 
 
 class SQL_DB:
 
-    # This class handles connection to the PostGreSQL
+    # TODO: This class handles connection to the PostGreSQL
     # database. Database connection is made available to all
     # instances of the SQL_DB class; need to consider setup
     
@@ -196,9 +199,9 @@ class SQL_DB:
 
 
     def  write_to_sql_db(self):
-    # The TypedDict records are to be passed to 
-    # this method and it handles writing to the
-    # database.
+    
+    # TODO: The TypedDict records are to be passed to 
+    # this method and it handles writing to the database.
 
 
     def read_from_sql_db(self):
