@@ -26,7 +26,7 @@ pkgs.mkShell {
     ];
  
     GREETING = " Hello World!! ^--^ !! ! ";
-    ALERTS_REPO="GuarddutyAlertsSampleData/";
+    ALERTS_REPO = "GuarddutyAlertsSampleData/";
 
     shellHook = ''
 
