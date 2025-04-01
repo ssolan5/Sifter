@@ -147,6 +147,7 @@ class JSONParser():
         else:
             return False
 
+
     def prepare_product_codes_json(self,product_item,product_record):
 
         match product_item[0]:
@@ -158,6 +159,7 @@ class JSONParser():
             case "ProductType":
 
                 product_record["product_type"] = product_item[1]
+
 
     def prepare_access_key_details_json(self,access_key_details_item,access_key_details_record):
 
@@ -179,6 +181,7 @@ class JSONParser():
 
                 access_key_details_records["user_type"] = access_key_details_item[1]
 
+
     def prepare_tag_json(self,tag_item,tag_record):
 
         match tag_item[0]:
@@ -191,8 +194,34 @@ class JSONParser():
 
                 tag_record["value"] = tag_item[1]
 
-   
 
+    def prepare_instance_details_json(self,instance_details_item,instance_details_record):
+
+        match instance_details_item[0]:
+
+            case "AvailabilityZone":
+                instance_details_record["availability_zone"] = instance_details_item[1]
+
+            case "IamInstanceProfile":
+                instance_details_record["iam_instance_profile"] = instance_details_item[1]
+
+            case "ImageDescription":
+                instance_details_record["image_description"] = instance_details_item[1]
+
+            case "ImageId":
+                instance_details_record["image_id"] = instance_details_item[1]
+
+            case "InstanceState":
+                instance_details_record["instance_state"] = instance_details_item[1]
+
+            case "InstanceType":
+                instance_details_record["instance_type"] = instance_details_item[1]
+
+            case "OutpostArn":
+                instance_details_record["outpost_arn"] = instance_details_item[1]
+
+            case "NetworkInterfaces":
+                instance_details_record["network_interfaces"] = instance_details_item[1]
 
     
     def prepare_resource_json(self,resource_item,resource_record):
