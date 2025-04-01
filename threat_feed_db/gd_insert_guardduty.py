@@ -23,6 +23,7 @@ class SecurityGroupsRecord(TypedDict, total=True):
 
 
 class NetworkInterfaceRecord(TypedDict, total=True):
+   
     ipv6_addresses: list
     network_interface_id: str
     private_dns_name: str
@@ -32,18 +33,26 @@ class NetworkInterfaceRecord(TypedDict, total=True):
     public_ip: str
     security_groups: list[SecurityGroupsRecord] 
 
+class IamInstanceProfile(TypedDict, total=True):
+    
+    arn: str
+    _id: str
 
 class InstanceDetailsRecord(TypedDict, total=True):
    
     availability_zone: str
+    iam_instance_profile: IamInstanceProfile
     image_description: str
     image_id: str
+    instance_id: str
     instance_state: str
     instance_type: str
+    outpost_arn: str
     network_interfaces: list[NetworkInterfaceRecord] 
 
 
 class AccessKeyDetailsRecord(TypedDict, total=True):
+ 
     access_key_id: str
     principle_id: str
     user_name: str
@@ -51,11 +60,13 @@ class AccessKeyDetailsRecord(TypedDict, total=True):
 
 
 class TagsRecord(TypedDict, total=True):
+    
     key: str
     value: str
 
 
 class ProductRecord(TypedDict, total=True):
+ 
     code: str
     product_type: str
 
@@ -113,6 +124,7 @@ class JSONRecord(TypedDict, total=True):
     resource: ResourceRecord
     service: ServiceRecord
     additional_data: dict
+    _type: str
 
 
 class JSONParser():
@@ -129,11 +141,60 @@ class JSONParser():
 
 
     def check_key(self,json_d,key):
+
         if key in json_d:
             return True
         else:
             return False
-    # def prepare_ 
+
+    def prepare_product_codes_json(self,product_item,product_record):
+
+        match product_item[0]:
+
+            case "Code":
+                
+                product_record["code"] = product_item[1]
+
+            case "ProductType":
+
+                product_record["product_type"] = product_item[1]
+
+    def prepare_access_key_details_json(self,access_key_details_item,access_key_details_record):
+
+        match access_key_details_item[0]:
+
+            case "AccessKeyId":
+
+                access_key_details_records["access_key_id"] = access_key_details_item[1]
+
+            case "PrincipleId":
+
+                access_key_details_records["principle_id"] = access_key_details_item[1]
+
+            case "UserName":
+
+                access_key_details_records["user_name"] = access_key_details_item[1]
+
+            case "UserType":
+
+                access_key_details_records["user_type"] = access_key_details_item[1]
+
+    def prepare_tag_json(self,tag_item,tag_record):
+
+        match tag_item[0]:
+
+            case "Key":
+                
+                tag_record["key"] = tag_item[1]
+
+            case "Value":
+
+                tag_record["value"] = tag_item[1]
+
+   
+
+
+    
     def prepare_resource_json(self,resource_item,resource_record):
 
         # This method iterates of the resource_item tuple
@@ -161,7 +222,6 @@ class JSONParser():
 
             case "ResourceType":
                 resource_record["resource_type"] = resource_item[1]
-
 
  
     def prepare_json(self,record_item,json_record):
@@ -206,7 +266,7 @@ class JSONParser():
 
             case "Type":
 
-                json_record["record_type"] = record_item[1]
+                json_record["_type"] = record_item[1]
 
             case "Resource":
 
