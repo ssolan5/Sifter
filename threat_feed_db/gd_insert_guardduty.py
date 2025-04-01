@@ -3,29 +3,65 @@ import os
 import pdb
 from typing import TypedDict
 
-class NetworkInterfacesRecord(TypedDict, total=True):
 
-    vpc_id: list
-    public_ip: list
+class PrivateIpAddressesRecord(TypedDict, total=True):
+    
+    private_dns_name: str
+    private_ip_address: str
+
+
+class SecurityGroupsRecord(TypedDict, total=True):
+
+    group_id: str
+    group_name: str
+
+
+class NetworkInterfaceRecord(TypedDict, total=True):
+    ipv6_addresses: list
     network_interface_id: str
+    private_dns_name: str
+    private_ip_address: str
+    private_ip_addresses: list[PrivateIpAddressesRecord] 
+    public_dns_name: str
+    public_ip: str
+    security_groups: list[SecurityGroupsRecords] 
 
- 
 
-class InstanceRecord(TypedDict, total=True):
+class InstanceDetailsRecord(TypedDict, total=True):
    
     availability_zone: str
+    image_description: str
+    image_id: str
     instance_state: str
-    instance_id: str
     instance_type: str
-    network_interfaces: NetworkInterfacesRecord 
-    
-#class AccessKeyRecord(TypedDict, total=True):
+    network_interfaces: list[NetworkInterfaceRecord] 
+
+
+class AccessKeyDetailsRecord(TypedDict, total=True):
+    access_key_id: str
+    principle_id: str
+    user_name: str
+    user_type: str
+
+
+class TagsRecord(TypedDict, total=True):
+    key: str
+    value: str
+
+
+class ProductRecord(TypedDict, total=True):
+    code: str
+    product_type: str
 
 
 class ResourceRecord(TypedDict, total=True):
      
-    access_key_details: dict
-    instance_record: InstanceRecord
+    access_key_details: AccessKeyRecord
+    instance_details: InstanceDetailsRecord
+    platform: str
+    product_codes: list[ProductRecord]
+    tags: list[TagsRecord] 
+    resource_type: str
 
 
 class AwsApiCallActionRecord(TypedDict, total=True):
@@ -91,7 +127,7 @@ class JSONParser():
             return True
         else:
             return False
- 
+    def prepare_ 
     def prepare_resource_json(self,resource_item,resource_record):
 
         # This method iterates of the resource_item tuple
@@ -105,18 +141,21 @@ class JSONParser():
             case "AccessKeyDetails":
                 resource_record["access_key_details"] = resource_item[1]
 
-                '''
-                case "InstanceDetails":
-                    resource_record["
+            case "InstanceDetails":
+                resource_record["instance_details"] = resource_item[1]
 
-                case "Platform":
+            case "Platform":
+                resource_record["platform"] = resource_item[1]
 
-                case "ProductCodes":
+            case "ProductCodes":
+                resource_record["product_codes"] = resource_item[1]
 
-                case "Tags":
+            case "Tags":
+                resource_record["tags"] = resource_item[1]
 
-                case "ResourceType":
-                '''
+            case "ResourceType":
+                resource_record["resource_type"] = resource_item[1]
+
 
  
     def prepare_json(self,record_item,json_record):
