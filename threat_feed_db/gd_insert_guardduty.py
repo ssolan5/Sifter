@@ -3,14 +3,29 @@ import os
 import pdb
 from typing import TypedDict
 
-class ResourceRecord(TypedDict, total=True):
- 
-    instance_id: str
-    instance_type: str
+class NetworkInterfacesRecord(TypedDict, total=True):
+
     vpc_id: list
     public_ip: list
-    network_interfaces: dict
+    network_interface_id: str
+
+ 
+
+class InstanceRecord(TypedDict, total=True):
+   
+    availability_zone: str
+    instance_state: str
+    instance_id: str
+    instance_type: str
+    network_interfaces: NetworkInterfacesRecord 
+    
+#class AccessKeyRecord(TypedDict, total=True):
+
+
+class ResourceRecord(TypedDict, total=True):
+     
     access_key_details: dict
+    instance_record: InstanceRecord
 
 
 class AwsApiCallActionRecord(TypedDict, total=True):
@@ -38,11 +53,16 @@ class ServiceRecord(TypedDict, total=True):
     service_name: str
  
 
+# This TypedDictionary represents one depth level into the JSON object, the next depth is
+# represented through a different TypedDictionary which this class definition takes as a member
+# variable. The TypedDictionaries are there to preserve the structure of the JSON Object obtained
+# from the AWS Api as much as possible for further refinement and insertion into the database.
+
 class JSONRecord(TypedDict, total=True):
  
-    account_id: str
+    account_id: str 
     region: str
-    created_at: str
+    created_at: str 
     updated_at: str
     severity: int
     title: str 
@@ -71,6 +91,32 @@ class JSONParser():
             return True
         else:
             return False
+ 
+    def prepare_resource_json(self,resource_item,resource_record):
+
+        # This method iterates of the resource_item tuple
+
+        # For debugging purposes --
+        # print(type(resource_item))
+        # print(resource_item)
+
+        match resource_item[0]:
+
+            case "AccessKeyDetails":
+                resource_record["access_key_details"] = resource_item[1]
+
+                '''
+                case "InstanceDetails":
+                    resource_record["
+
+                case "Platform":
+
+                case "ProductCodes":
+
+                case "Tags":
+
+                case "ResourceType":
+                '''
 
  
     def prepare_json(self,record_item,json_record):
@@ -120,6 +166,11 @@ class JSONParser():
             case "Resource":
 
                 resource_dict = dict(record_item[1])
+                
+                resource_record = ResourceRecord()
+
+                dict(filter(lambda item: self.prepare_resource_json(item,resource_record),resource_dict.items()))
+                json_record["resource"] = resource_record
 
                 # TODO: Shift functionality for parsing the Resource 
                 # elsewhere, this is stand-in code for it currently.
@@ -159,9 +210,9 @@ class JSONParser():
 
                 dict(filter(lambda item: self.prepare_json(item,json_record),record.items()))
                 
+
                 # Appending the JSONRecord to the main list after populating
                 self.json_record_list.append(json_record)
-
 
 
             for item in self.json_record_list:
