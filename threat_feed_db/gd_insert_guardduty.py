@@ -3,6 +3,12 @@ import os
 import pdb
 from typing import TypedDict
 
+# As I am writing these classes I am realizing that since I am following a 
+# strict naming convention -___- for the keys and the record types i should 
+# have just written a script in python that takes one item of the json file and
+# have it generate the classes -_____-
+
+# But I guess typing these out is also soothing 
 
 class PrivateIpAddressesRecord(TypedDict, total=True):
     
@@ -24,7 +30,7 @@ class NetworkInterfaceRecord(TypedDict, total=True):
     private_ip_addresses: list[PrivateIpAddressesRecord] 
     public_dns_name: str
     public_ip: str
-    security_groups: list[SecurityGroupsRecords] 
+    security_groups: list[SecurityGroupsRecord] 
 
 
 class InstanceDetailsRecord(TypedDict, total=True):
@@ -56,7 +62,7 @@ class ProductRecord(TypedDict, total=True):
 
 class ResourceRecord(TypedDict, total=True):
      
-    access_key_details: AccessKeyRecord
+    access_key_details: AccessKeyDetailsRecord
     instance_details: InstanceDetailsRecord
     platform: str
     product_codes: list[ProductRecord]
@@ -127,7 +133,7 @@ class JSONParser():
             return True
         else:
             return False
-    def prepare_ 
+    # def prepare_ 
     def prepare_resource_json(self,resource_item,resource_record):
 
         # This method iterates of the resource_item tuple
