@@ -10,13 +10,13 @@ from typing import TypedDict
 
 # But I guess typing these out is also soothing 
 
-class PrivateIpAddressesRecord(TypedDict, total=True):
+class PrivateIpAddressRecord(TypedDict, total=True):
     
     private_dns_name: str
     private_ip_address: str
 
 
-class SecurityGroupsRecord(TypedDict, total=True):
+class SecurityGroupRecord(TypedDict, total=True):
 
     group_id: str
     group_name: str
@@ -28,15 +28,15 @@ class NetworkInterfaceRecord(TypedDict, total=True):
     network_interface_id: str
     private_dns_name: str
     private_ip_address: str
-    private_ip_addresses: list[PrivateIpAddressesRecord] 
+    private_ip_addresses: list[PrivateIpAddressRecord] 
     public_dns_name: str
     public_ip: str
-    security_groups: list[SecurityGroupsRecord] 
+    security_groups: list[SecurityGroupRecord] 
     subnet_id: str
     vpc_id: str
 
 
-class IamInstanceProfile(TypedDict, total=True):
+class IamInstanceProfileRecord(TypedDict, total=True):
     
     arn: str
     _id: str
@@ -57,7 +57,7 @@ class ProductRecord(TypedDict, total=True):
 class InstanceDetailsRecord(TypedDict, total=True):
    
     availability_zone: str
-    iam_instance_profile: IamInstanceProfile
+    iam_instance_profile: IamInstanceProfileRecord
     image_description: str
     image_id: str
     instance_id: str
@@ -85,12 +85,22 @@ class ResourceRecord(TypedDict, total=True):
     resource_type: str
 
 
+class RemoteIpDetailsRecord(TypedDict, total=True):
+
+    city: dict
+    country: dict
+    geo_location: dict
+    ip_address_v4: str
+    ip_address_v6: str
+    organization: dict
+
+
 class AwsApiCallActionRecord(TypedDict, total=True):
 
     api_name: str
     caller_type: str
     error_code: str
-    remote_ip_details: dict
+    remote_ip_details: RemoteIpDetailsRecord
     service_name: str
     affected_resources: dict
 
@@ -141,7 +151,8 @@ class JSONRecord(TypedDict, total=True):
     title: str 
     _type: str
     updated_at: str
-    
+
+
 class JSONParser():
 
     # This class handles parsing the JSON file into TypedDictionaries that 
@@ -164,6 +175,86 @@ class JSONParser():
         else:
         
             return False
+
+
+    def prepare_action_json(self, action_item, action_record):
+
+        match action_item[0]:
+
+            case "ActionType":
+
+                action_record["action_type"] = action_item[1]
+
+            case "AwsApiCallAction":
+
+                aws_api_call_action_record = AwsApiCallActionRecord()
+
+                dict(filter(lambda item: self.prepare_aws_api_call_action_json(item, aws_api_call_action_record),action_item[1].items()))
+
+                action_record["aws_api_call_action"] = aws_api_call_action_record
+
+    
+    def prepare_remote_ip_details_json(self, remote_ip_details_item, remote_ip_details_record):
+
+        match remote_ip_details_item[0]:
+
+            case "City":
+
+                remote_ip_details_record["city"] = remote_ip_details_item[1]
+
+            case "Country":
+                
+                remote_ip_details_record["country"] = remote_ip_details_item[1]
+
+            case "GeoLocation":
+                
+                remote_ip_details_record["geo_location"] = remote_ip_details_item[1]
+
+            case "IpAddressV4":
+
+                remote_ip_details_record["ip_address_v4"] = remote_ip_details_item[1]
+
+            case "IpAddressV6":
+
+                remote_ip_details_record["ip_address_v6"] = remote_ip_details_item[1]
+
+            case "Organization":
+
+                remote_ip_details_record["organization"] = remote_ip_details_item[1]
+
+
+    def prepare_aws_api_call_action_json(self, aws_api_call_action_item, aws_api_call_action_record):
+
+        match aws_api_call_action_item[0]:
+
+            case "Api":
+                
+                aws_api_call_action_record["api"] = aws_api_call_action_item[1]
+
+            case "CallerType":
+
+                aws_api_call_action_record["caller_type"] = aws_api_call_action_item[1]
+
+            case "ErrorCode":
+
+                aws_api_call_action_record["error_code"] = aws_api_call_action_item[1]
+
+            case "RemoteIpDetails":
+
+                remote_ip_details_record = RemoteIpDetailsRecord()
+
+                dict(filter(lambda item: self.prepare_remote_ip_details_json(item,remote_ip_details_record),aws_api_call_action_item[1].items()))
+
+                aws_api_call_action_record["remote_ip_details"] = remote_ip_details_record
+
+
+            case "ServiceName":
+
+                aws_api_call_action_record["service_name"] = aws_api_call_action_item[1]
+
+            case "AffectedResources":
+
+                aws_api_call_action_record["affected_resources"] = aws_api_call_action_item[1]
 
 
     def prepare_product_codes_json(self,product_item,product_record):
@@ -198,7 +289,11 @@ class JSONParser():
 
             case "Action":
 
-                service_record["action"] = service_item[1]
+                action_record = ActionRecord()
+
+                dict(filter(lambda item: self.prepare_action_json(item,action_record),service_item[1].items()))
+
+                service_record["action"] = action_record
 
             case "Evidence":
 
@@ -241,6 +336,32 @@ class JSONParser():
                 service_record["additional_info"] = service_item[1]
 
 
+    def prepare_private_ip_addresses_json(self, private_ip_address_item, private_ip_address_record):
+        
+        match private_ip_address_item[0]:
+
+            case "PrivateDnsName":
+                
+                private_ip_address_record["private_dns_name"] = private_ip_address_item[1]
+            
+            case "PrivateIpAddress":
+
+                private_ip_address_record["private_ip_address"] = private_ip_address_item[1]
+
+
+    def prepare_security_groups_json(self, security_group_item, security_group_record):
+
+        match security_group_item[0]:
+
+            case "GroupId":
+                
+                security_group_record["group_id"] = security_group_item[1]
+
+            case "GroupName":
+                
+                security_group_record["group_name"] = security_group_item[1]
+
+
     def prepare_network_interface_json(self, network_interface_item, network_interface_record):
 
         match network_interface_item[0]:
@@ -263,7 +384,17 @@ class JSONParser():
 
             case "PrivateIpAddresses":
 
-                network_interface_record["private_ip_addresses"] = network_interface_item[1]
+                private_ip_addresses_list = list()
+
+                for private_ip_addresses_item in network_interface_item[1]:
+
+                    private_ip_address_record = PrivateIpAddressRecord()
+                    
+                    list(filter(lambda item: self.prepare_private_ip_addresses_json(item,private_ip_address_record),private_ip_addresses_item.items()))
+
+                    private_ip_addresses_list.append(private_ip_address_record);
+
+                network_interface_record["private_ip_addresses"] = private_ip_addresses_list
 
             case "PublicDnsName":
 
@@ -275,7 +406,17 @@ class JSONParser():
 
             case "SecurityGroups":
 
-                network_interface_record["security_groups"] = network_interface_item[1]
+                security_groups_list = list()
+
+                for security_group_item in network_interface_item[1]:
+
+                    security_group_record = SecurityGroupRecord()
+                    
+                    list(filter(lambda item: self.prepare_security_groups_json(item,security_group_record),security_group_item.items()))
+                    
+                    security_groups_list.append(security_group_record)
+
+                network_interface_record["security_groups"] = security_groups_list
 
             case "SubnetId":
 
@@ -321,6 +462,19 @@ class JSONParser():
                 tag_record["value"] = tag_item[1]
 
 
+    def prepare_iam_instance_profile_json(self,iam_instance_profile_item,iam_instance_profile_record):
+
+        match iam_instance_profile_item[0]:
+
+            case "Arn":
+                
+                iam_instance_profile_record["arn"] = iam_instance_profile_item[1]
+            
+            case "Id":
+                
+                iam_instance_profile_record["_id"] = iam_instance_profile_item[1]
+
+
     def prepare_instance_details_json(self,instance_details_item,instance_details_record):
 
         match instance_details_item[0]:
@@ -331,7 +485,11 @@ class JSONParser():
 
             case "IamInstanceProfile":
 
-                instance_details_record["iam_instance_profile"] = instance_details_item[1]
+                iam_instance_profile_record = IamInstanceProfileRecord()
+
+                dict(filter(lambda item: self.prepare_iam_instance_profile_json(item,iam_instance_profile_record), instance_details_item[1].items()))
+
+                instance_details_record["iam_instance_profile"] = iam_instance_profile_record
 
             case "ImageDescription":
 
@@ -398,7 +556,6 @@ class JSONParser():
                     tags_list.append(tag_record)
 
                 instance_details_record["tags"] = tags_list
-
 
     
     def prepare_resource_json(self,resource_item,resource_record):
@@ -519,7 +676,6 @@ class JSONParser():
                 # print(json.dumps(record, indent= 4))
 
                 json_record = JSONRecord()
-                # print(json_record)
  
                 # Create a JSONRecord type here pertaining to one JSON
                 # object and pass it to the prepare_json method. 
@@ -533,8 +689,8 @@ class JSONParser():
                 self.json_record_list.append(json_record)
 
 
-            # for item in self.json_record_list:
-            print(self.json_record_list[0])
+            for item in self.json_record_list:
+                print(self.json_record_list)
 
 '''
 
