@@ -235,7 +235,6 @@ class JSONParser():
             case "AdditionalInfo":
 
                 additional_info_record = AdditionalInfoRecord()
-                # print(type(service_item[1]))
 
                 dict(filter(lambda item: self.prepare_additional_info_json(item,additional_info_record),service_item[1].items()))
 
@@ -363,6 +362,7 @@ class JSONParser():
                     network_interface_record = NetworkInterfaceRecord()
 
                     list(filter(lambda item: self.prepare_network_interface_json(item, network_interface_record),network_interface.items()))
+
                     network_interfaces_list.append(network_interface_record)
 
                 instance_details_record["network_interfaces"] = network_interfaces_list
@@ -380,6 +380,7 @@ class JSONParser():
                     product_record = ProductRecord()
 
                     list(filter(lambda item: self.prepare_product_codes_json(item,product_record),product_item.items()))
+
                     product_list.append(product_record)
 
                 instance_details_record["product_codes"] = product_list
@@ -408,8 +409,6 @@ class JSONParser():
         # print(type(resource_item))
         # print(resource_item)
 
-        # print(resource_item)
-
         match resource_item[0]:
 
             case "AccessKeyDetails":
@@ -422,8 +421,6 @@ class JSONParser():
 
 
             case "InstanceDetails":
-
-                # resource_record["instance_details"] = resource_item[1]
 
                 instance_details_record = InstanceDetailsRecord()
                 dict(filter(lambda item: self.prepare_instance_details_json(item,instance_details_record),resource_item[1].items()))
@@ -515,9 +512,6 @@ class JSONParser():
         with open(self.file_path, "r") as file:
  
             self.json_dict = json.load(file)
-
-            # For debugging purposes -- 
-            # print(json.dumps(guard_duty_json, indent= 4))
 
             for record in self.json_dict:
  
