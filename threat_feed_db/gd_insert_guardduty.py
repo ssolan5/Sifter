@@ -178,6 +178,20 @@ class JSONParser():
 
                 product_record["product_type"] = product_item[1]
 
+
+    def prepare_additional_info_json(self, additional_info_item, additional_info_record):
+
+        match additional_info_item[0]:
+
+            case "Value":
+
+                additional_info_record["value"] = additional_info_item[1]
+
+            case "Type":
+
+                additional_info_record["_type"] = additional_info_item[1]
+
+
     def prepare_service_json(self, service_item, service_record):
 
         match service_item[0]:
@@ -216,11 +230,17 @@ class JSONParser():
 
             case "ServiceName":
 
-                service_name["service_name"] = service_item[1]
+                service_record["service_name"] = service_item[1]
 
             case "AdditionalInfo":
 
-                service_name["additional_info"] = service_item[1]
+                additional_info_record = AdditionalInfoRecord()
+                # print(type(service_item[1]))
+
+                dict(filter(lambda item: self.prepare_additional_info_json(item,additional_info_record),service_item[1].items()))
+
+                service_record["additional_info"] = service_item[1]
+
 
     def prepare_network_interface_json(self, network_interface_item, network_interface_record):
 
@@ -431,33 +451,25 @@ class JSONParser():
 
                 json_record["account_id"] = record_item[1] 
 
-            case "Region": 
-
-                json_record["region"] = record_item[1]
+            case "Arn":
+            
+                json_record["arn"] = record_item[1]
 
             case "CreatedAt":
 
                 json_record["created_at"] = record_item[1]
 
-            case "UpdatedAt":
-
-                json_record["updated_at"] = record_item[1]
-
-            case "Severity":
-
-                json_record["severity"] = record_item[1]
-
-            case "Title":
-
-                json_record["title"] = record_item[1]
-
             case "Description":
 
                 json_record["description"] = record_item[1]
 
-            case "Type":
+            case "Id":
 
-                json_record["_type"] = record_item[1]
+                json_record["_id"] = record_item[1]
+
+            case "Region": 
+
+                json_record["region"] = record_item[1]
 
             case "Resource":
 
@@ -469,20 +481,34 @@ class JSONParser():
 
                 json_record["resource"] = resource_record
 
-                # TODO: Shift functionality for parsing the Resource 
-                # elsewhere, this is stand-in code for it currently.
+            case "SchemaVersion":
 
-                # For debugging purposes --
-                # breakpoint()
+                json_record["schema_version"] = record_item[1]
 
-                '''
-                if self.check_key(resource_dict,"InstanceDetails"):
-                    json_record["instance_id"]=resource_dict["InstanceDetails"]["InstanceId"]
-                    json_record["instance_type"]=resource_dict["InstanceDetails"]["InstanceType"]
+            case "Service":
 
-                    if self.check_key(resource_dict,"NetworkInterfaces"):
-                        json_record["public_ip"]=resource_dict["InstanceDetails"]["NetworkInterfaces"][0]["PublicIp"]
-                '''
+                service_record = ServiceRecord()
+
+                dict(filter(lambda item: self.prepare_service_json(item, service_record),record_item[1].items()))
+
+                json_record["service"] = service_record
+
+            case "Severity":
+
+                json_record["severity"] = record_item[1]
+
+            case "Title":
+
+                json_record["title"] = record_item[1]
+
+            case "Type":
+
+                json_record["_type"] = record_item[1]
+
+            case "UpdatedAt":
+
+                json_record["updated_at"] = record_item[1]
+
  
     def read_from_file(self):
  
@@ -513,8 +539,8 @@ class JSONParser():
                 self.json_record_list.append(json_record)
 
 
-            for item in self.json_record_list:
-                print(item)
+            # for item in self.json_record_list:
+            print(self.json_record_list[0])
 
 '''
 
