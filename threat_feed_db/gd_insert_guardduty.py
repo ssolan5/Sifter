@@ -32,34 +32,17 @@ class NetworkInterfaceRecord(TypedDict, total=True):
     public_dns_name: str
     public_ip: str
     security_groups: list[SecurityGroupsRecord] 
+    subnet_id: str
+    vpc_id: str
+
 
 class IamInstanceProfile(TypedDict, total=True):
     
     arn: str
     _id: str
 
-class InstanceDetailsRecord(TypedDict, total=True):
-   
-    availability_zone: str
-    iam_instance_profile: IamInstanceProfile
-    image_description: str
-    image_id: str
-    instance_id: str
-    instance_state: str
-    instance_type: str
-    outpost_arn: str
-    network_interfaces: list[NetworkInterfaceRecord] 
 
-
-class AccessKeyDetailsRecord(TypedDict, total=True):
- 
-    access_key_id: str
-    principle_id: str
-    user_name: str
-    user_type: str
-
-
-class TagsRecord(TypedDict, total=True):
+class TagRecord(TypedDict, total=True):
     
     key: str
     value: str
@@ -71,13 +54,34 @@ class ProductRecord(TypedDict, total=True):
     product_type: str
 
 
+class InstanceDetailsRecord(TypedDict, total=True):
+   
+    availability_zone: str
+    iam_instance_profile: IamInstanceProfile
+    image_description: str
+    image_id: str
+    instance_id: str
+    instance_state: str
+    instance_type: str
+    outpost_arn: str
+    network_interfaces: list[NetworkInterfaceRecord]
+    platform: str
+    product_codes: list[ProductRecord]
+    tags: list[TagRecord] 
+       
+
+class AccessKeyDetailsRecord(TypedDict, total=True):
+ 
+    access_key_id: str
+    principle_id: str
+    user_name: str
+    user_type: str
+
+
 class ResourceRecord(TypedDict, total=True):
      
     access_key_details: AccessKeyDetailsRecord
     instance_details: InstanceDetailsRecord
-    platform: str
-    product_codes: list[ProductRecord]
-    tags: list[TagsRecord] 
     resource_type: str
 
 
@@ -96,15 +100,26 @@ class ActionRecord(TypedDict, total=True):
     action_type: str
     aws_api_call_action: AwsApiCallActionRecord
 
- 
+
+class AdditionalInfoRecord(TypedDict, total=True):
+
+    value: dict
+    _type: str
+
+
 class ServiceRecord(TypedDict, total=True):
  
     action: ActionRecord
     evidence: dict
     archived: bool
+    count: str
+    detector_id: str
+    event_first_seen: str
+    event_last_seen: str
     resource_role: str
     service_name: str
- 
+    additional_info: AdditionalInfoRecord
+
 
 # This TypedDictionary represents one depth level into the JSON object, the next depth is
 # represented through a different TypedDictionary which this class definition takes as a member
@@ -114,19 +129,19 @@ class ServiceRecord(TypedDict, total=True):
 class JSONRecord(TypedDict, total=True):
  
     account_id: str 
+    arn: str
+    created_at: str
+    description: str # varchar(300) ??
+    _id: str
     region: str
-    created_at: str 
-    updated_at: str
+    resource: ResourceRecord
+    schema_version: str
+    service: ServiceRecord
     severity: int
     title: str 
-    description: str # varchar(300) ??
-    record_type: str
-    resource: ResourceRecord
-    service: ServiceRecord
-    additional_data: dict
     _type: str
-
-
+    updated_at: str
+    
 class JSONParser():
 
     # This class handles parsing the JSON file into TypedDictionaries that 
@@ -143,8 +158,11 @@ class JSONParser():
     def check_key(self,json_d,key):
 
         if key in json_d:
+            
             return True
+        
         else:
+        
             return False
 
 
@@ -160,6 +178,95 @@ class JSONParser():
 
                 product_record["product_type"] = product_item[1]
 
+    def prepare_service_json(self, service_item, service_record):
+
+        match service_item[0]:
+
+            case "Action":
+
+                service_record["action"] = service_item[1]
+
+            case "Evidence":
+
+                service_record["evidence"] = service_item[1]
+
+            case "Archived":
+
+                service_record["archived"] = service_item[1]
+
+            case "Count":
+
+                service_record["count"] = service_item[1]
+
+            case "DetectorId":
+
+                service_record["detector_id"] = service_item[1]
+
+            case "EventFirstSeen":
+
+                service_record["event_first_seen"] = service_item[1]
+
+            case "EventLastSeen":
+
+                service_record["event_last_seen"] = service_item[1]
+
+            case "ResourceRole":
+
+                service_record["resource_role"] = service_item[1]
+
+            case "ServiceName":
+
+                service_name["service_name"] = service_item[1]
+
+            case "AdditionalInfo":
+
+                service_name["additional_info"] = service_item[1]
+
+    def prepare_network_interface_json(self, network_interface_item, network_interface_record):
+
+        match network_interface_item[0]:
+
+            case "Ipv6Addresses":
+
+                network_interface_record["ipv6_address"] = network_interface_item[1]
+
+            case "NetworkInterfaceId":
+
+                network_interface_record["network_interface_id"] = network_interface_item[1]
+
+            case "PrivateDnsName":
+
+                network_interface_record["private_dns_name"] = network_interface_item[1]
+
+            case "PrivateIpAddress":
+
+                network_interface_record["private_ip_address"] = network_interface_item[1]
+
+            case "PrivateIpAddresses":
+
+                network_interface_record["private_ip_addresses"] = network_interface_item[1]
+
+            case "PublicDnsName":
+
+                network_interface_record["public_dns_name"] = network_interface_item[1]
+
+            case "PublicIp":
+
+                network_interface_record["public_ip"] = network_interface_item[1]
+
+            case "SecurityGroups":
+
+                network_interface_record["security_groups"] = network_interface_item[1]
+
+            case "SubnetId":
+
+                network_interface_record["subnet_id"] = network_interface_item[1]
+
+            case "VpcId":
+
+                network_interface_record["vpc_id"] = network_interface_item[1]
+
+
 
     def prepare_access_key_details_json(self,access_key_details_item,access_key_details_record):
 
@@ -167,19 +274,19 @@ class JSONParser():
 
             case "AccessKeyId":
 
-                access_key_details_records["access_key_id"] = access_key_details_item[1]
+                access_key_details_record["access_key_id"] = access_key_details_item[1]
 
             case "PrincipleId":
 
-                access_key_details_records["principle_id"] = access_key_details_item[1]
+                access_key_details_record["principle_id"] = access_key_details_item[1]
 
             case "UserName":
 
-                access_key_details_records["user_name"] = access_key_details_item[1]
+                access_key_details_record["user_name"] = access_key_details_item[1]
 
             case "UserType":
 
-                access_key_details_records["user_type"] = access_key_details_item[1]
+                access_key_details_record["user_type"] = access_key_details_item[1]
 
 
     def prepare_tag_json(self,tag_item,tag_record):
@@ -200,56 +307,111 @@ class JSONParser():
         match instance_details_item[0]:
 
             case "AvailabilityZone":
+
                 instance_details_record["availability_zone"] = instance_details_item[1]
 
             case "IamInstanceProfile":
+
                 instance_details_record["iam_instance_profile"] = instance_details_item[1]
 
             case "ImageDescription":
+
                 instance_details_record["image_description"] = instance_details_item[1]
 
             case "ImageId":
+                
                 instance_details_record["image_id"] = instance_details_item[1]
 
             case "InstanceState":
+                
                 instance_details_record["instance_state"] = instance_details_item[1]
 
             case "InstanceType":
+                
                 instance_details_record["instance_type"] = instance_details_item[1]
 
             case "OutpostArn":
+                
                 instance_details_record["outpost_arn"] = instance_details_item[1]
 
             case "NetworkInterfaces":
-                instance_details_record["network_interfaces"] = instance_details_item[1]
+
+                network_interfaces_list = list()
+
+                for network_interface in instance_details_item[1]:
+
+                    network_interface_record = NetworkInterfaceRecord()
+
+                    list(filter(lambda item: self.prepare_network_interface_json(item, network_interface_record),network_interface.items()))
+                    network_interfaces_list.append(network_interface_record)
+
+                instance_details_record["network_interfaces"] = network_interfaces_list
+
+            case "Platform":
+
+                instance_details_record["platform"] = instance_details_item[1]
+
+            case "ProductCodes":
+
+                product_list = list()
+
+                for product_item in instance_details_item[1]:
+
+                    product_record = ProductRecord()
+
+                    list(filter(lambda item: self.prepare_product_codes_json(item,product_record),product_item.items()))
+                    product_list.append(product_record)
+
+                instance_details_record["product_codes"] = product_list
+
+            case "Tags":
+
+                tags_list = list()
+
+                for tag_item in instance_details_item[1]:
+
+                    tag_record = TagRecord()
+
+                    list(filter(lambda item: self.prepare_tag_json(item, tag_record), tag_item.items()))
+
+                    tags_list.append(tag_record)
+
+                instance_details_record["tags"] = tags_list
+
 
     
     def prepare_resource_json(self,resource_item,resource_record):
 
-        # This method iterates of the resource_item tuple
+        # This method iterates on the resource_item tuple
 
         # For debugging purposes --
         # print(type(resource_item))
         # print(resource_item)
 
+        # print(resource_item)
+
         match resource_item[0]:
 
             case "AccessKeyDetails":
-                resource_record["access_key_details"] = resource_item[1]
+
+                access_key_details_record = AccessKeyDetailsRecord()
+
+                dict(filter(lambda item: self.prepare_access_key_details_json(item,access_key_details_record),resource_item[1].items()))
+
+                resource_record["access_key_details"] = access_key_details_record
+
 
             case "InstanceDetails":
-                resource_record["instance_details"] = resource_item[1]
 
-            case "Platform":
-                resource_record["platform"] = resource_item[1]
+                # resource_record["instance_details"] = resource_item[1]
 
-            case "ProductCodes":
-                resource_record["product_codes"] = resource_item[1]
+                instance_details_record = InstanceDetailsRecord()
+                dict(filter(lambda item: self.prepare_instance_details_json(item,instance_details_record),resource_item[1].items()))
 
-            case "Tags":
-                resource_record["tags"] = resource_item[1]
+                resource_record["instance_details"] = instance_details_record
 
             case "ResourceType":
+
                 resource_record["resource_type"] = resource_item[1]
 
  
@@ -304,6 +466,7 @@ class JSONParser():
                 resource_record = ResourceRecord()
 
                 dict(filter(lambda item: self.prepare_resource_json(item,resource_record),resource_dict.items()))
+
                 json_record["resource"] = resource_record
 
                 # TODO: Shift functionality for parsing the Resource 
@@ -312,13 +475,14 @@ class JSONParser():
                 # For debugging purposes --
                 # breakpoint()
 
+                '''
                 if self.check_key(resource_dict,"InstanceDetails"):
                     json_record["instance_id"]=resource_dict["InstanceDetails"]["InstanceId"]
                     json_record["instance_type"]=resource_dict["InstanceDetails"]["InstanceType"]
 
                     if self.check_key(resource_dict,"NetworkInterfaces"):
                         json_record["public_ip"]=resource_dict["InstanceDetails"]["NetworkInterfaces"][0]["PublicIp"]
-
+                '''
  
     def read_from_file(self):
  
