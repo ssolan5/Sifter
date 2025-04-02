@@ -27,6 +27,9 @@ pkgs.mkShell {
  
     GREETING = " Hello World!! ^--^ !! ! ";
     ALERTS_REPO = "GuarddutyAlertsSampleData/";
+    DB_DIR=".tmp/db";
+    PGDATA="";
+
 
     shellHook = ''
 
@@ -65,10 +68,10 @@ pkgs.mkShell {
       
       # Adapting https://mgdm.net/weblog/postgresql-in-a-nix-shell/
       # for shell hook
-
-      DB_DIR=".tmp/db"
-      PGDATA="$DB_DIR"
-
+      
+      PGDATA="$(pwd)/$DB_DIR"
+      echo "This is PGDATA $PGDATA"| cowsay -f hellokitty | lolcat
+ 
       if test -d "$DB_DIR"; then 
 
           echo "Database is already initialized so not creating again" | cowsay -f hellokitty | lolcat
