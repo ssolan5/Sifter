@@ -265,7 +265,6 @@ class JSONParser():
 
                 aws_api_call_action_record["remote_ip_details"] = remote_ip_details_record
 
-
             case "ServiceName":
 
                 aws_api_call_action_record["service_name"] = aws_api_call_action_item[1]
@@ -424,7 +423,6 @@ class JSONParser():
 
                 self.insert_sql_record(primary_key,"public_ip",network_interface_item[1])
 
-
             case "SecurityGroups":
 
                 security_groups_list = list()
@@ -491,10 +489,15 @@ class JSONParser():
             case "Arn":
                 
                 iam_instance_profile_record["arn"] = iam_instance_profile_item[1]
+
+                self.insert_sql_record(primary_key,"iam_arn",iam_instance_profile_item[1])
             
             case "Id":
                 
                 iam_instance_profile_record["_id"] = iam_instance_profile_item[1]
+
+                self.insert_sql_record(primary_key,"iam_id",iam_instance_profile_item[1])
+            
 
 
     def prepare_instance_details_json(self,instance_details_item,instance_details_record,primary_key):
@@ -665,7 +668,6 @@ class JSONParser():
 
                 self.insert_sql_record(primary_key,"region",record_item[1])
 
-
             case "Resource":
 
                 resource_dict = dict(record_item[1])
@@ -786,10 +788,10 @@ class SQL_DB:
         self.database_pass = "password"
         self.database_name = "gd_security_alerts"
 
-        self.dsn_string = " dbname=" + self.database_name + "\
-                            user=" + self.database_user + "\
-                            password=" + self.database_pass + "\
-                            host=" + self.database_host + "\
+        self.dsn_string = " dbname=" + self.database_name + "      \
+                            user=" + self.database_user + "        \
+                            password=" + self.database_pass + "    \
+                            host=" + self.database_host + "        \
                             port=" + self.database_port
 
         print(parse_dsn(self.dsn_string))
@@ -817,6 +819,8 @@ class SQL_DB:
                                             "public_ip VARCHAR(50),"          \
                                             "instance_id VARCHAR(255),"       \
                                             "instance_type VARCHAR(100),"     \
+                                            "iam_arn VARCHAR(255),"           \
+                                            "iam_id VARCHAR(255),"            \
                                             "vpc_id VARCHAR(255),"            \
                                             "title VARCHAR(255),"             \
                                             "resource_type VARCHAR(100),"     \
@@ -826,6 +830,7 @@ class SQL_DB:
                     except psycopg2.Error as e:
 
                         print("PostGreSQL Error "+ str(e))
+
 
             self.database_connection.close()
 
@@ -871,7 +876,7 @@ class SQL_DB:
             ip_dict = { "public_ip" : ip_list }
             vpc_dict = { "vpc_id" : vpc_list }
 
-            record = [ item for item in record if item[0]!="public_ip" and item[0]!="vpc_id"]
+            record = [ item for item in record if item[0]!="public_ip" and item[0]!="vpc_id" ]
             
             record.append(ip_dict)
             record.append(vpc_dict)
@@ -943,11 +948,13 @@ class SQL_DB:
                         # TODO : Write a check for database already existing 
                         # but for now this suffices --
 
-                        if str(e) in "duplicate key value violates unique constraint":
-                            print("Database already exists !! ")
-                            self.database_connection.close()
-                    
-                        print("Database Error :" + str(e))
+                        if "duplicate key value violates unique constraint" in str(e):
+                        
+                            print("Database already populated with values")
+                        
+                        else:
+                            
+                            print("Database Error :" + str(e))
 
 
             self.database_connection.close()
@@ -959,20 +966,100 @@ class SQL_DB:
     # this method and it handles writing to the database.
 
 
-    def read_from_sql_db(self):
+    def read_from_sql_db(self,option):
 
         # TODO: Retrieve all high security alerts
         # SELECT * FROM guardduty_alerts WHERE severity > 5
 
         # TODO: Count of alerts per Region 
-        # SELECT COUNT(Region) FROM guardduty_alerts
+        # SELECT COUNT(*) FROM guardduty_alerts GROUP BY region
 
-        # TODO:
+        # TODO: Find alerts by specific IP address
+        # SELECT * FROM guardduty_alerts WHERE ipaddress='<insert ip address here>'
+
+        # TODO: Extract Title and Description from JSON Data
+        # SELECT title,description FROM guardduty_alerts
+
+        # TODO: Detect IAM Users involved in Alerts
+        # SELECT iam_id,iam_arn FROM guardduty_alerts
 
 
 
+        '''
+
+        try:
+
+            self.database_connection = psycopg2.connect(self.dsn_string)
+
+        except psycopg2.Error as e:
+
+            print("Unable to connect to the database")
+        
+        else:
+
+            with self.database_connection:
+                with self.database_connection.cursor() as cursor:
+                    try:
+
+                        match option:
+
+                            case 1:
+
+                                query = cursor.mogrify(sql.SQL("""SELECT * FROM %(table)s WHERE severity > 7  \
+                                                           """),{ 'table' : AsIs("guardduty_alerts") })
+
+                                cursor.execute(query)
+                                results = cursor.fetchall()
+
+                                print(results)
+
+                            case 2:
+
+                                query = cursor.mogrify(sql.SQL("""INSERT INTO %(table)s (%(colname)s) VALUES (%(pkey)s)  \
+                                                           """),{ 'table' : AsIs("guardduty_alerts"), 'colname' : AsIs('gd_id'), 'pkey' : str(key) })
+                                cursor.mogrify
+
+                                results = cursor.execute
+
+                                print(results)
+
+                            case 3:
+
+                                query = cursor.mogrify(sql.SQL("""INSERT INTO %(table)s (%(colname)s) VALUES (%(pkey)s)  \
+                                                               """),{ 'table' : AsIs("guardduty_alerts"), 'colname' : AsIs('gd_id'), 'pkey' : str(key) })
+                                cursor.mogrify
+
+                                results = cursor.execute
+
+                                print(results)
+
+                            case 4:
+
+                                query = cursor.mogrify(sql.SQL("""INSERT INTO %(table)s (%(colname)s) VALUES (%(pkey)s)  \
+                                                           """),{ 'table' : AsIs("guardduty_alerts"), 'colname' : AsIs('gd_id'), 'pkey' : str(key) })
+                                cursor.mogrify
+
+                                results = cursor.execute
+
+                                print(results)
+
+                            case 5:
+
+                                query = cursor.mogrify(sql.SQL("""INSERT INTO %(table)s (%(colname)s) VALUES (%(pkey)s)  \
+                                                           """),{ 'table' : AsIs("guardduty_alerts"), 'colname' : AsIs('gd_id'), 'pkey' : str(key) })
+                                cursor.mogrify
+
+                                results = cursor.execute
+
+                                print(results)
+
+                    except psycopg2.Error as e:
 
 
+
+            self.database_connection.close()
+
+            '''
 def main():
     
     sql_db = SQL_DB()
