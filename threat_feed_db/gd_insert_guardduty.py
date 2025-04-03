@@ -776,9 +776,6 @@ class ArgumentParser:
 
 class SQL_DB:
 
-    # TODO: This class handles connection to the PostGreSQL
-    # database. Database connection is made available to all
-    # instances of the SQL_DB class; need to consider setup
     
     def __init__(self):
         
@@ -966,7 +963,7 @@ class SQL_DB:
     # this method and it handles writing to the database.
 
 
-    def read_from_sql_db(self,option):
+    def read_from_sql_db(self,options):
 
         # TODO: Retrieve all high security alerts
         # SELECT * FROM guardduty_alerts WHERE severity > 5
@@ -984,9 +981,6 @@ class SQL_DB:
         # SELECT iam_id,iam_arn FROM guardduty_alerts
 
 
-
-        '''
-
         try:
 
             self.database_connection = psycopg2.connect(self.dsn_string)
@@ -996,6 +990,13 @@ class SQL_DB:
             print("Unable to connect to the database")
         
         else:
+
+                        
+            if type(options) is list:
+                option = options[0]
+                ipaddress = options[1]
+            else:
+                option = options
 
             with self.database_connection:
                 with self.database_connection.cursor() as cursor:
@@ -1015,51 +1016,49 @@ class SQL_DB:
 
                             case 2:
 
-                                query = cursor.mogrify(sql.SQL("""INSERT INTO %(table)s (%(colname)s) VALUES (%(pkey)s)  \
-                                                           """),{ 'table' : AsIs("guardduty_alerts"), 'colname' : AsIs('gd_id'), 'pkey' : str(key) })
-                                cursor.mogrify
+                                query = cursor.mogrify(sql.SQL("""SELECT DISTINCT COUNT(*) FROM  %(table)s GROUP BY region  \
+                                                           """),{ 'table' : AsIs("guardduty_alerts") })
 
-                                results = cursor.execute
+                                cursor.execute(query)
+                                results = cursor.fetchall()
 
                                 print(results)
 
                             case 3:
 
-                                query = cursor.mogrify(sql.SQL("""INSERT INTO %(table)s (%(colname)s) VALUES (%(pkey)s)  \
-                                                               """),{ 'table' : AsIs("guardduty_alerts"), 'colname' : AsIs('gd_id'), 'pkey' : str(key) })
-                                cursor.mogrify
-
-                                results = cursor.execute
+                                query = cursor.mogrify(sql.SQL("""SELECT * FROM %(table)s WHERE public_ip=(%(ipaddress)s)  \
+                                                               """),{ 'table' : AsIs("guardduty_alerts"), 'ipaddress' : str(ipaddress) })
+                                cursor.execute(query)
+                                results = cursor.fetchall()
 
                                 print(results)
 
                             case 4:
 
-                                query = cursor.mogrify(sql.SQL("""INSERT INTO %(table)s (%(colname)s) VALUES (%(pkey)s)  \
-                                                           """),{ 'table' : AsIs("guardduty_alerts"), 'colname' : AsIs('gd_id'), 'pkey' : str(key) })
-                                cursor.mogrify
-
-                                results = cursor.execute
+                                query = cursor.mogrify(sql.SQL("""SELECT title, description FROM %(table)s  \
+                                                           """),{ 'table' : AsIs("guardduty_alerts") })
+                                cursor.execute(query)
+                                results = cursor.fetchall()
 
                                 print(results)
 
                             case 5:
 
-                                query = cursor.mogrify(sql.SQL("""INSERT INTO %(table)s (%(colname)s) VALUES (%(pkey)s)  \
-                                                           """),{ 'table' : AsIs("guardduty_alerts"), 'colname' : AsIs('gd_id'), 'pkey' : str(key) })
-                                cursor.mogrify
-
-                                results = cursor.execute
+                                query = cursor.mogrify(sql.SQL("""SELECT iam_arn,iam_id FROM %(table)s  \
+                                                           """),{ 'table' : AsIs("guardduty_alerts") })
+                                cursor.execute(query)
+                                results = cursor.fetchall()
 
                                 print(results)
 
                     except psycopg2.Error as e:
 
+                        print("Database Error : " + str(e))
+
 
 
             self.database_connection.close()
 
-            '''
 def main():
     
     sql_db = SQL_DB()
@@ -1068,7 +1067,105 @@ def main():
     jsonparse.read_from_file()
 
     # TODO: Handle the text based UI interface here for SQL querying and printing results. 
+    # TODO: Handle loading of external AWS Guard Duty alerts JSON file into the database
+    # TODO: 
 
- 
+    option = 0
+
+    welcome_string = " Select the following command line options\n"                   \
+                     " 1. SQL Query for selecting high severity (>7) alerts\n"        \
+                     " 2. SQL Query for counting alerts per region\n"                 \
+                     " 3. SQL Query for selecting alerts per ip address\n"            \
+                     " 4. SQL Query for selecting Title and Descriptions of alerts\n" \
+                     " 5. SQL Query for selecting IAM users involved with alerts\n"   \
+                     " 6. Exit menu and close database gracefully...Goodbye! \n"
+
+
+    while option != 6:
+        
+        print(welcome_string)
+        
+        option = int(input("Please enter your option here ----->"))
+
+        if option > 6:
+        
+            print("-----------------------------------------------------------")
+
+            print("User has entered the wrong option, please try again!\n")
+            
+            print("-----------------------------------------------------------")
+
+            continue
+
+        else:
+
+            match option:
+                
+                case 1:
+
+                    print("-----------------------------------------------------------")
+
+                    sql_db.read_from_sql_db(option)
+
+                    print("-----------------------------------------------------------")
+
+                case 2:
+
+                    print("-----------------------------------------------------------")
+
+                    sql_db.read_from_sql_db(option)
+
+                    print("-----------------------------------------------------------")
+
+                case 3:
+
+                    print("-----------------------------------------------------------")
+
+                    options = list()
+                    options.append(option)
+                    options.append(input("Please enter the ip address to query the database with:"))
+
+                    sql_db.read_from_sql_db(options)
+
+                    print("-----------------------------------------------------------")
+
+                case 4:
+
+                    print("-----------------------------------------------------------")
+
+                    sql_db.read_from_sql_db(option)
+
+                    print("-----------------------------------------------------------")
+
+                case 5:
+
+                    print("-----------------------------------------------------------")
+
+                    sql_db.read_from_sql_db(option)
+
+                    print("-----------------------------------------------------------")
+
+                case 6:
+
+                    print("-----------------------------------------------------------")
+
+                    os.system("dropdb gd_security_alerts")
+                    os.system("pg_ctl -D ../.tmp/db stop")
+                    os._exit(os.EX_OK)
+
+                    print("-----------------------------------------------------------")
+
+
+                case _:
+
+                    print("-----------------------------------------------------------")
+
+                    print("User has entered the wrong option, please try again!\n")
+                    continue
+
+                    print("-----------------------------------------------------------")
+
+
+
 if __name__ == "__main__":
     main()
