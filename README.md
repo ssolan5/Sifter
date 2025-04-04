@@ -25,6 +25,12 @@ The nix shell will open up in the threat feed db directory:
 
  - `uv run gd_insert_guardduty.py`
 
+If you want to run the script again:
+
+Unfortunately currently cannot call uv run `gd_insert_gurardduty.py` again after choosing the option 6 as it shuts down the server, need to handle that cleanly, so
+after following the instructions as written in Closing and clean up, you can call 
+
+- `make run` again
 
 
 ## Closing and clean up
