@@ -1066,9 +1066,9 @@ def main():
     jsonparse = JSONParser("../GuarddutyAlertsSampleData/Guardduty Sample Alert Data.json",sql_db)
     jsonparse.read_from_file()
 
+    # TODO: Handle giving the option to start the database from the textual interface
     # TODO: Handle the text based UI interface here for SQL querying and printing results. 
     # TODO: Handle loading of external AWS Guard Duty alerts JSON file into the database
-    # TODO: 
 
     option = 0
 
