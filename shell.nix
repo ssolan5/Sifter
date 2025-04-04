@@ -21,7 +21,7 @@ pkgs.mkShell {
                 cowsay
         	lolcat
                 git
-                
+                coreutils 
 
     ];
  
@@ -68,55 +68,49 @@ pkgs.mkShell {
       
       # Adapting https://mgdm.net/weblog/postgresql-in-a-nix-shell/
       # for shell hook
-      
-      PGDATA="$(pwd)/$DB_DIR"
-      echo "This is PGDATA $PGDATA"| cowsay -f hellokitty | lolcat
  
       if test -d "$DB_DIR"; then 
 
           echo "Database is already initialized so not creating again" | cowsay -f hellokitty | lolcat
+	  # checkCommand=$(pg_ctl -D . stop)
+          # if [[ $checkCommand == "*Is server running?*" ]]
+ 
+
+
+      else
 
           cd $DB_DIR
-
-          if [[ $(ls -al .s.PGSQL.5432) ]]; then
-
-	      echo "Socket file exists, need to clean up; stop and start server " | cowsay -f hellokitty | lolcat 
-              
-              # TODO: Need to make a check here with pg_ctl status
-
-              # If server has already started then stop it 
-              pg_ctl -D . stop
-              
-              # Restart the server as socket may or may not 
-              # be stuck anymore
-              pg_ctl -D . -l logfile -o "--unix_socket_directories='$PWD'" start
-
-              echo "Server should be started now?1?!?!?" | cowsay -f hellokitty | lolcat
-
-           else
-
-               pg_ctl -D . -l logfile -o "--unix_socket_directories='$PWD'" start
-
-           fi
- 
-      else
 
           mkdir -p $DB_DIR
           cd $DB_DIR
 
           # Initializing database files
           initdb -D .
+          
+          # TODO : debug unix socket directories issue
+          # awk -i inplace '{ sub(/\/tmp/,ENVIRON["PGDATA"],$3) }1' postgresql.conf 
+
  
           # Check if that port is not already being used for PGSQL 
           # connections or a remnant from before -- test runs  
 
-          echo "PostgreSQL Server starting ! !! was not on previously " | cowsay -f hellokitty | lolcat 
+          echo "Checking if someone is already using the socket for the server" | cowsay -f hellokitty | lolcat
 
-	   # Starts a PostGreSQL server 
-	   pg_ctl -D . -l logfile -o "--unix_socket_directories='$PWD'" start
-	   
-           # Intialize my database "db" in database
-	   createdb db -h "$(pwd)"
+          # checkCommand=$(pg_ctl -D . stop)
+          # if [[ $checkCommand == "*Is server running?* || $checkCommand == "*server stopped*" ]]
+
+
+          echo "PostgreSQL Server starting ! !! " | cowsay -f hellokitty | lolcat 
+
+	  # Starts a PostGreSQL server 
+	  pg_ctl -D . -l logfile start   
+          
+          # Intialize my database "db" in database
+	  # TODO: debug socket files, setting up PGDATA
+          # createdb db -h "$(pwd)"
+
+          createdb gd_security_alerts
+          psql -d gd_security_alerts -c "CREATE USER postgres WITH SUPERUSER PASSWORD 'password';" 
 
       fi
 
