@@ -1149,7 +1149,7 @@ def main():
 
                     print("-----------------------------------------------------------")
 
-                    os.system("dropdb gd_security_alerts")
+                    # os.system("dropdb gd_security_alerts")
                     os.system("pg_ctl -D ../.tmp/db stop")
                     os._exit(os.EX_OK)
 
