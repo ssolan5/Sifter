@@ -45,5 +45,40 @@ In the repository directory:
 
  - `make clean`
 
+## Future Work
 
+
+
+- [ ] Additions to `shell.nix`
+	
+	- [ ] Check database file status 
+		- [ ] if the database already initialized thus would have the user already setup
+			- [ ]  check database server status  in the shellHook
+				- [ ] if the database server is not running 
+					- [ ] start it 
+				- [ ] if the database server is running then
+					- [ ] do nothing 
+
+	- [ ] If database file does not exist
+		- [ ] Initialize the database 
+		- [ ] Start the database server
+			- [ ] create the user 
+			- [ ] Call `uv run gd_guardduty_alerts.py` 
+				- such that the textual interface is initialized after the user calls `make run`
+			- [ ] handle exiting out of the shell nix in the python file directly 
+
+
+
+- [ ] Additions to `gd_guardduty_alerts.py`
+
+	- [ ]  Handle different alerts file to pass to the `JSONparser` and place in the database
+		- [ ] user input handling and file validation
+		- [ ] Either create multiple databases or create a new table each time
+	- [ ] Start and Stop database
+		- [ ] Textual interface option 
+		- [ ] commands to `pg_ctl` through `os.system`
+	- [ ] Parse SQL query results in a nicer format for human readability. 
+	- [ ] Make multiple tables for each of the different JSON depths 
+		- [ ] show off `SQL JOINs`
+		- [ ] have each of the table's primary key be the `id` 
 
