@@ -85,30 +85,34 @@ pkgs.mkShell {
 
           # Initializing database files
           initdb -D .
-          
-          # TODO : debug unix socket directories issue
-          # awk -i inplace '{ sub(/\/tmp/,ENVIRON["PGDATA"],$3) }1' postgresql.conf 
+
+          if [[ $? -ne 0 ]]; then 
+ 
+              # TODO : debug unix socket directories issue
+              # awk -i inplace '{ sub(/\/tmp/,ENVIRON["PGDATA"],$3) }1' postgresql.conf 
 
  
-          # Check if that port is not already being used for PGSQL 
-          # connections or a remnant from before -- test runs  
+              # Check if that port is not already being used for PGSQL 
+              # connections or a remnant from before -- test runs  
 
-          # echo "Checking if someone is already using the socket for the server" | cowsay -f hellokitty | lolcat
+              echo "Checking if someone is already using the socket for the server" | cowsay -f hellokitty | lolcat
 
-          # checkCommand=$(pg_ctl -D . stop)
-          # if [[ $checkCommand == "*Is server running?* || $checkCommand == "*server stopped*" ]]
-          echo "PostgreSQL Server starting ! !! " | cowsay -f hellokitty | lolcat 
+              # checkCommand=$(pg_ctl -D . stop)
+              # if [[ $checkCommand == "*Is server running?* || $checkCommand == "*server stopped*" ]]
+          else
+              echo "PostgreSQL Server starting ! !! " | cowsay -f hellokitty | lolcat 
 
-	  # Starts a PostGreSQL server 
-	  pg_ctl -D . -l logfile start   
+	      # Starts a PostGreSQL server 
+	      pg_ctl -D . -l logfile start   
           
-          # Intialize my database "db" in database
-	  # TODO: debug socket files, setting up PGDATA
-          # createdb db -h "$(pwd)"
+               # Intialize my database "db" in database
+	       # TODO: debug socket files, setting up PGDATA
+               # createdb db -h "$(pwd)"
 
-          createdb gd_security_alerts
-          psql -d gd_security_alerts -c "CREATE USER postgres WITH SUPERUSER PASSWORD 'password';" 
-
+               createdb gd_security_alerts
+               psql -d gd_security_alerts -c "CREATE USER postgres WITH SUPERUSER PASSWORD 'password';" 
+          fi
+      
       fi
 
       # Once the database is initialized and status checked
