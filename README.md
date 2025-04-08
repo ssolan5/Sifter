@@ -31,9 +31,9 @@ The nix shell will open up in the threat feed db directory:
 If you want to run the script again:
 
  - `uv run gd_insert_guardduty.py`
- - choose option 7 from the ensuing interactive textual interface
+ - choose option 7 from the ensuing interactive textual interface like so:
 
-![Start Server](Images/startserver.png)
+![Start Server](Images/scriptrunning.gif)
 
 
 ## Closing and clean up
