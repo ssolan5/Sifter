@@ -21,12 +21,14 @@ pkgs.mkShell {
                 cowsay
         	lolcat
                 git
-                coreutils 
+                coreutils
+                less 
 
     ];
  
     GREETING = " Hello World!! ^--^ !! ! ";
     ALERTS_REPO = "GuarddutyAlertsSampleData/";
+    ALERTS_REPO_1 = "GuarddutyAlertsSampleData-1/";
     DB_DIR=".tmp/db";
     PGDATA="";
 
@@ -34,33 +36,37 @@ pkgs.mkShell {
     shellHook = ''
 
       COMMAND_OUTPUT=$(uv init threat_feed_db 2>&1)
-
+      
       if [[ $? -eq 0 ]]; then
+            
+            # If the command has an exit status of 0 that implies 
+            # that the uv init occurred successfully, i.e the toml 
+            # file for uv project has already been initialized with
+            # required dependencies.
  
             cd threat_feed_db
             uv add psycopg2-binary
  
             # Exiting out of the uv repo after adding dependencies
 	    cd ..
- 
-
-      # else 
-
-            # echo "$COMMAND_OUTPUT" | cowsay -f hellokitty | lolcat 
 
       fi
 
       echo $GREETING | cowsay -f hellokitty | lolcat
  
-      # Cloning the Guard Duty sample alerts json repo
+      # Cloning the Guard Duty Sample Alerts JSON repo
+      # Checking if the alerts repo is already there
  
-      if test -d "$ALERTS_REPO"; then 
+      if test -d "$ALERTS_REPO" || test -d "$ALERTS_REPO_1" ; then 
 
           echo "GuarddutyAlertsSampleData exists!" | cowsay -f hellokitty | lolcat
 
-      else 
+      else
 
-          git clone https://github.com/vkatariaairisec/GuarddutyAlertsSampleData.git
+          # why is git printing out on stderr 
+
+          GIT_CLONE_ALERTS=$(git clone https://github.com/vkatariaairisec/GuarddutyAlertsSampleData.git 2>&1)
+          GIT_CLONE_ALERTS_1=$(git clone https://github.com/ssolan5/GuarddutyAlertsSampleData-1.git 2>&1)
 
       fi
 
@@ -74,44 +80,47 @@ pkgs.mkShell {
           echo "Database is already initialized so not creating again" | cowsay -f hellokitty | lolcat
 	  # checkCommand=$(pg_ctl -D . stop)
           # if [[ $checkCommand == "*Is server running?*" ]]
- 
-
 
       else
-
-          cd $DB_DIR
+          
 
           mkdir -p $DB_DIR
           cd $DB_DIR
 
           # Initializing database files
-          initdb -D .
-          
-          # TODO : debug unix socket directories issue
-          # awk -i inplace '{ sub(/\/tmp/,ENVIRON["PGDATA"],$3) }1' postgresql.conf 
+          INIT_DB=$(initdb -D . 2>&1)
+	  echo "PostgreSQL Database Initializing ! !! " | cowsay -f hellokitty | lolcat 
+
+
+          if [[ $? -ne 0 ]]; then 
+ 
+              # TODO : debug unix socket directories issue
+              # awk -i inplace '{ sub(/\/tmp/,ENVIRON["PGDATA"],$3) }1' postgresql.conf 
 
  
-          # Check if that port is not already being used for PGSQL 
-          # connections or a remnant from before -- test runs  
+              # Check if that port is not already being used for PGSQL 
+              # connections or a remnant from before -- test runs  
 
-          echo "Checking if someone is already using the socket for the server" | cowsay -f hellokitty | lolcat
+              echo "Checking if someone is already using the socket for the server" | cowsay -f hellokitty | lolcat
 
-          # checkCommand=$(pg_ctl -D . stop)
-          # if [[ $checkCommand == "*Is server running?* || $checkCommand == "*server stopped*" ]]
+              # checkCommand=$(pg_ctl -D . stop)
+              # if [[ $checkCommand == "*Is server running?* || $checkCommand == "*server stopped*" ]]
 
+          else
 
-          echo "PostgreSQL Server starting ! !! " | cowsay -f hellokitty | lolcat 
+              echo "PostgreSQL Server starting ! !! " | cowsay -f hellokitty | lolcat 
 
-	  # Starts a PostGreSQL server 
-	  pg_ctl -D . -l logfile start   
+	      # Starts a PostGreSQL server 
+	      pg_ctl -D . -l logfile start   
           
-          # Intialize my database "db" in database
-	  # TODO: debug socket files, setting up PGDATA
-          # createdb db -h "$(pwd)"
+              # Intialize my database "db" in database
+	      # TODO: debug socket files, setting up PGDATA
+              # createdb db -h "$(pwd)"
 
-          createdb gd_security_alerts
-          psql -d gd_security_alerts -c "CREATE USER postgres WITH SUPERUSER PASSWORD 'password';" 
-
+              createdb gd_security_alerts
+              psql -d gd_security_alerts -c "CREATE USER postgres WITH SUPERUSER PASSWORD 'password';" 
+          fi
+      
       fi
 
       # Once the database is initialized and status checked

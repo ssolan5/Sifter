@@ -791,7 +791,7 @@ class SQL_DB:
                             host=" + self.database_host + "        \
                             port=" + self.database_port
 
-        print(parse_dsn(self.dsn_string))
+        # print(parse_dsn(self.dsn_string))
 
         try:
 
@@ -826,8 +826,44 @@ class SQL_DB:
                     
                     except psycopg2.Error as e:
 
-                        print("PostGreSQL Error "+ str(e))
+                        print("PostGreSQL Error: "+ str(e))
+                        
+                        if 'Relation "guardduty_alerts" already exists' in str(e):
+                            try:
+                                # Reinitializing the table as we are creating a new
+                                # SQL_DB object that takes in a new file entirely.
+                                # The other alternative method is to just add to the 
+                                # same database 
 
+                                '''
+                                cursor.execute("DROP TABLE guardduty_alerts;")
+                                
+                                cursor.execute("CREATE TABLE guardduty_alerts ("      \
+                                                    "gd_id VARCHAR(255) PRIMARY KEY," \
+                                                    "account_id VARCHAR(255),"        \
+                                                    "region VARCHAR(100),"            \
+                                                    "created_at TIMESTAMP,"           \
+                                                    "updated_at TIMESTAMP,"           \
+                                                    "severity INT,"                   \
+                                                    "public_ip VARCHAR(50),"          \
+                                                    "instance_id VARCHAR(255),"       \
+                                                    "instance_type VARCHAR(100),"     \
+                                                    "iam_arn VARCHAR(255),"           \
+                                                    "iam_id VARCHAR(255),"            \
+                                                    "vpc_id VARCHAR(255),"            \
+                                                    "title VARCHAR(255),"             \
+                                                    "resource_type VARCHAR(100),"     \
+                                                    "description VARCHAR,"            \
+                                                    "additional_data JSONB);")
+                                '''
+                                print("Table already exists!")
+
+                            except psycopg2.Error as e:
+
+                                print("PostGreSQL Error: " + str(e))
+
+                                # TODO: fix this error message
+                                # print("Table guardduty_alerts could not be reinitialized to accept a new file")
 
             self.database_connection.close()
 
@@ -890,13 +926,16 @@ class SQL_DB:
 
         except psycopg2.Error as e:
 
-            print("Unable to connect to the database")
+            # print("PostGreSQL Error: " + str(e))
+            print("Has the server started?")
 
         else:
             with self.database_connection:
                 with self.database_connection.cursor() as cursor:
                     try:
 
+                        print("Writing new values into the table\n")
+ 
                         for key in modified_sql_record:
 
                             # Initializing all records. First query sets up primary key column in database 
@@ -904,7 +943,7 @@ class SQL_DB:
                             query = cursor.mogrify(sql.SQL("""INSERT INTO %(table)s (%(colname)s) VALUES (%(pkey)s)  \
                                                            """),{ 'table' : AsIs("guardduty_alerts"), 'colname' : AsIs('gd_id'), 'pkey' : str(key) })
                             cursor.execute(query)
-
+                            
                             for item in modified_sql_record[key]:
 
                                 # For each record, with Primary Key as id, we add all the columns after encoding for the database. 
@@ -947,11 +986,11 @@ class SQL_DB:
 
                         if "duplicate key value violates unique constraint" in str(e):
                         
-                            print("Database already populated with values")
+                            print("Database already populated with values for these primary keys !!\n")
                         
                         else:
                             
-                            print("Database Error :" + str(e))
+                            print("PostGreSQL Error :" + str(e))
 
 
             self.database_connection.close()
@@ -962,6 +1001,21 @@ class SQL_DB:
     # TODO: The TypedDict records are to be passed to 
     # this method and it handles writing to the database.
 
+
+    def print_sql_results(self,results):
+
+        
+        print("-----------------------------------------------------------")
+        
+        print("SQL query returned " + str(len(results)) + " records")
+        
+        print("-----------------------------------------------------------")
+ 
+        for record in results:
+
+            print(record)
+            print("-----------------------------------------------------------")
+    
 
     def read_from_sql_db(self,options):
 
@@ -990,7 +1044,6 @@ class SQL_DB:
             print("Unable to connect to the database")
         
         else:
-
                         
             if type(options) is list:
                 option = options[0]
@@ -1012,17 +1065,17 @@ class SQL_DB:
                                 cursor.execute(query)
                                 results = cursor.fetchall()
 
-                                print(results)
+                                self.print_sql_results(results)
 
                             case 2:
 
-                                query = cursor.mogrify(sql.SQL("""SELECT DISTINCT COUNT(*) FROM  %(table)s GROUP BY region  \
+                                query = cursor.mogrify(sql.SQL("""SELECT region,COUNT(*) FROM  %(table)s GROUP BY region  \
                                                            """),{ 'table' : AsIs("guardduty_alerts") })
 
                                 cursor.execute(query)
                                 results = cursor.fetchall()
 
-                                print(results)
+                                self.print_sql_results(results)
 
                             case 3:
 
@@ -1031,7 +1084,7 @@ class SQL_DB:
                                 cursor.execute(query)
                                 results = cursor.fetchall()
 
-                                print(results)
+                                self.print_sql_results(results)
 
                             case 4:
 
@@ -1040,7 +1093,7 @@ class SQL_DB:
                                 cursor.execute(query)
                                 results = cursor.fetchall()
 
-                                print(results)
+                                self.print_sql_results(results)
 
                             case 5:
 
@@ -1049,7 +1102,7 @@ class SQL_DB:
                                 cursor.execute(query)
                                 results = cursor.fetchall()
 
-                                print(results)
+                                self.print_sql_results(results)
 
                     except psycopg2.Error as e:
 
@@ -1078,16 +1131,18 @@ def main():
                      " 3. SQL Query for selecting alerts per ip address\n"            \
                      " 4. SQL Query for selecting Title and Descriptions of alerts\n" \
                      " 5. SQL Query for selecting IAM users involved with alerts\n"   \
-                     " 6. Exit menu and close database gracefully...Goodbye! \n"
+                     " 6. Add new entries to the existing table guardduty_alerts\n"   \
+                     " 7. Start the server\n"                                         \
+                     " 8. Exit menu and close database gracefully...Goodbye! \n"
 
 
-    while option != 6:
+    while option != 8:
         
         print(welcome_string)
         
         option = int(input("Please enter your option here ----->"))
 
-        if option > 6:
+        if option > 8:
         
             print("-----------------------------------------------------------")
 
@@ -1146,6 +1201,27 @@ def main():
                     print("-----------------------------------------------------------")
 
                 case 6:
+
+                    print("-----------------------------------------------------------")
+
+                    jsonparse_1 = JSONParser("../GuarddutyAlertsSampleData-1/Guardduty Sample Alert Data.json",sql_db)
+                    jsonparse_1.read_from_file()
+
+
+                    print("-----------------------------------------------------------")
+
+                case 7:
+
+                    print("-----------------------------------------------------------")
+ 
+                    exit_status = os.system("pg_ctl -D ../.tmp/db -l logfile start 2>&1")
+
+                    if exit_status == 256:
+                        print("Server may have already been started")
+
+                    print("-----------------------------------------------------------")
+
+                case 8:
 
                     print("-----------------------------------------------------------")
 
