@@ -48,6 +48,8 @@ In the repository directory:
 ## Future Work
 
 
+Functionality of most of the additions to nix shell already exists in the `main` branch, 
+but has to be made cleaner 
 
 - [ ] Additions to `shell.nix`
 	
@@ -68,16 +70,17 @@ In the repository directory:
 			- [ ] handle exiting out of the shell nix in the python file directly 
 
 
+Functionality of the selected additions for `gd_guardduty_alerts.py` exists in the dev branch.
 
 - [ ] Additions to `gd_guardduty_alerts.py`
 
-	- [ ]  Handle different alerts file to pass to the `JSONparser` and place in the database
+	- [x]  Handle different alerts file to pass to the `JSONparser` and place in the database
 		- [ ] user input handling and file validation
-		- [ ] Either create multiple databases or create a new table each time
-	- [ ] Start and Stop database
-		- [ ] Textual interface option 
-		- [ ] commands to `pg_ctl` through `os.system`
-	- [ ] Parse SQL query results in a nicer format for human readability. 
+		- [x] Either create multiple databases or create a new table each time
+	- [x] Start and Stop database
+		- [x] Textual interface option 
+		- [x] commands to `pg_ctl` through `os.system`
+	- [x] Parse SQL query results in a nicer format for human readability. 
 	- [ ] Make multiple tables for each of the different JSON depths 
 		- [ ] show off `SQL JOINs`
 		- [ ] have each of the table's primary key be the `id` 
