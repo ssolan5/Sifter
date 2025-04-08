@@ -826,9 +826,9 @@ class SQL_DB:
                     
                     except psycopg2.Error as e:
 
-                        print("PostGreSQL Error "+ str(e))
+                        print("PostGreSQL Error: "+ str(e))
                         
-                        if "Relation already exists" in str(e):
+                        if 'Relation "guardduty_alerts" already exists' in str(e):
                             try:
                                 # Reinitializing the table as we are creating a new
                                 # SQL_DB object that takes in a new file entirely.
@@ -856,18 +856,20 @@ class SQL_DB:
                                                     "description VARCHAR,"            \
                                                     "additional_data JSONB);")
                                 '''
-                                print("We are adding into the same Database contents of a new file")
+                                print("Table already exists!")
 
                             except psycopg2.Error as e:
 
-                                print("Table guardduty_alerts could not be reinitialized to accept a new file")
+                                print("PostGreSQL Error: " + str(e))
+
+                                # TODO: fix this error message
+                                # print("Table guardduty_alerts could not be reinitialized to accept a new file")
 
             self.database_connection.close()
 
 
     def write_into_sql_db(self,sql_record):
 
-        print("Writing into the table")
         modified_sql_record = dict()
 
         for key in sql_record:
@@ -924,13 +926,16 @@ class SQL_DB:
 
         except psycopg2.Error as e:
 
-            print("Unable to connect to the database")
+            # print("PostGreSQL Error: " + str(e))
+            print("Has the server started?")
 
         else:
             with self.database_connection:
                 with self.database_connection.cursor() as cursor:
                     try:
 
+                        print("Writing new values into the table\n")
+ 
                         for key in modified_sql_record:
 
                             # Initializing all records. First query sets up primary key column in database 
@@ -938,7 +943,7 @@ class SQL_DB:
                             query = cursor.mogrify(sql.SQL("""INSERT INTO %(table)s (%(colname)s) VALUES (%(pkey)s)  \
                                                            """),{ 'table' : AsIs("guardduty_alerts"), 'colname' : AsIs('gd_id'), 'pkey' : str(key) })
                             cursor.execute(query)
-
+                            
                             for item in modified_sql_record[key]:
 
                                 # For each record, with Primary Key as id, we add all the columns after encoding for the database. 
@@ -981,11 +986,11 @@ class SQL_DB:
 
                         if "duplicate key value violates unique constraint" in str(e):
                         
-                            print("Database already populated with values for these primary keys")
+                            print("Database already populated with values for these primary keys !!\n")
                         
                         else:
                             
-                            print("Database Error :" + str(e))
+                            print("PostGreSQL Error :" + str(e))
 
 
             self.database_connection.close()
@@ -1127,16 +1132,17 @@ def main():
                      " 4. SQL Query for selecting Title and Descriptions of alerts\n" \
                      " 5. SQL Query for selecting IAM users involved with alerts\n"   \
                      " 6. Add new entries to the existing table guardduty_alerts\n"   \
-                     " 7. Exit menu and close database gracefully...Goodbye! \n"
+                     " 7. Start the server\n"                                         \
+                     " 8. Exit menu and close database gracefully...Goodbye! \n"
 
 
-    while option != 7:
+    while option != 8:
         
         print(welcome_string)
         
         option = int(input("Please enter your option here ----->"))
 
-        if option > 7:
+        if option > 8:
         
             print("-----------------------------------------------------------")
 
@@ -1204,9 +1210,18 @@ def main():
 
                     print("-----------------------------------------------------------")
 
-
-
                 case 7:
+
+                    print("-----------------------------------------------------------")
+ 
+                    exit_status = os.system("pg_ctl -D ../.tmp/db -l logfile start 2>&1")
+
+                    if exit_status == 256:
+                        print("Server may have already been started")
+
+                    print("-----------------------------------------------------------")
+
+                case 8:
 
                     print("-----------------------------------------------------------")
 
