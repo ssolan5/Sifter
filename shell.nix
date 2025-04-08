@@ -60,10 +60,12 @@ pkgs.mkShell {
 
           echo "GuarddutyAlertsSampleData exists!" | cowsay -f hellokitty | lolcat
 
-      else 
+      else
 
-          git clone https://github.com/vkatariaairisec/GuarddutyAlertsSampleData.git
-          git clone https://github.com/ssolan5/GuarddutyAlertsSampleData-1.git
+          # why is git printing out on stderr 
+
+          GIT_CLONE_ALERTS=$(git clone https://github.com/vkatariaairisec/GuarddutyAlertsSampleData.git 2>&1)
+          GIT_CLONE_ALERTS_1=$(git clone https://github.com/ssolan5/GuarddutyAlertsSampleData-1.git 2>&1)
 
       fi
 
@@ -79,14 +81,15 @@ pkgs.mkShell {
           # if [[ $checkCommand == "*Is server running?*" ]]
 
       else
-
-          cd $DB_DIR
+          
 
           mkdir -p $DB_DIR
           cd $DB_DIR
 
           # Initializing database files
-          initdb -D .
+          INIT_DB=$(initdb -D . 2>&1)
+	  echo "PostgreSQL Database Initializing ! !! " | cowsay -f hellokitty | lolcat 
+
 
           if [[ $? -ne 0 ]]; then 
  
@@ -101,6 +104,7 @@ pkgs.mkShell {
 
               # checkCommand=$(pg_ctl -D . stop)
               # if [[ $checkCommand == "*Is server running?* || $checkCommand == "*server stopped*" ]]
+
           else
 
               echo "PostgreSQL Server starting ! !! " | cowsay -f hellokitty | lolcat 
@@ -108,12 +112,12 @@ pkgs.mkShell {
 	      # Starts a PostGreSQL server 
 	      pg_ctl -D . -l logfile start   
           
-               # Intialize my database "db" in database
-	       # TODO: debug socket files, setting up PGDATA
-               # createdb db -h "$(pwd)"
+              # Intialize my database "db" in database
+	      # TODO: debug socket files, setting up PGDATA
+              # createdb db -h "$(pwd)"
 
-               createdb gd_security_alerts
-               psql -d gd_security_alerts -c "CREATE USER postgres WITH SUPERUSER PASSWORD 'password';" 
+              createdb gd_security_alerts
+              psql -d gd_security_alerts -c "CREATE USER postgres WITH SUPERUSER PASSWORD 'password';" 
           fi
       
       fi

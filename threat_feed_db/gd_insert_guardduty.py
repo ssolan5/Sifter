@@ -1002,7 +1002,7 @@ class SQL_DB:
         
         print("-----------------------------------------------------------")
         
-        print("SQL query returned " + str(len(results)))
+        print("SQL query returned " + str(len(results)) + " records")
         
         print("-----------------------------------------------------------")
  
