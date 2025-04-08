@@ -100,6 +100,7 @@ pkgs.mkShell {
               # checkCommand=$(pg_ctl -D . stop)
               # if [[ $checkCommand == "*Is server running?* || $checkCommand == "*server stopped*" ]]
           else
+
               echo "PostgreSQL Server starting ! !! " | cowsay -f hellokitty | lolcat 
 
 	      # Starts a PostGreSQL server 
