@@ -12,16 +12,15 @@ Clone the repo and initialize:
 
  - `git clone https://github.com/ssolan5/Sifter.git`
  - `cd Sifter`
- 
  - Install nix, this will install nix and start the setup process:
     -  `sh <(curl -L https://nixos.org/nix/install)`
     -  Verify installation
        - `nix --version`
     - nix provides a shell environment that allows one to setup and use specified packages, that ends up not messing up the user's existing installs
 
-![Nix Shell](Images/nix-shell.png)     
-
  -  `make run`
+
+![Nix Shell](Images/nix-shell.png)     
 
 In the ensuing nix shell:
 
@@ -34,6 +33,7 @@ If you want to run the script again:
  - `uv run gd_insert_guardduty.py`
  - choose option 7 from the ensuing interactive textual interface
 
+![Start Server](Images/startserver.png)
 
 
 ## Closing and clean up
