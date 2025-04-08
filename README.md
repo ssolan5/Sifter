@@ -21,7 +21,7 @@ Clone the repo and initialize:
      
  -  `make run`
 
-In the ensueing nix shell:
+In the ensuing nix shell:
 
 The nix shell will open up in the threat feed db directory:
 
@@ -29,10 +29,9 @@ The nix shell will open up in the threat feed db directory:
 
 If you want to run the script again:
 
-Unfortunately currently cannot call uv run `gd_insert_gurardduty.py` again after choosing the option 6 as it shuts down the server, need to handle that cleanly, so
-after following the instructions as written in Closing and clean up, you can then again call: 
+ - `uv run gd_insert_guardduty.py`
+ - choose option 7 from the ensuing interactive textual interface
 
-- `make run` 
 
 
 ## Closing and clean up
