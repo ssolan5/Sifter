@@ -62,13 +62,13 @@ but has to be made cleaner
 				- [ ] if the database server is running then
 					- [ ] do nothing 
 
-	- [ ] If database file does not exist
-		- [ ] Initialize the database 
-		- [ ] Start the database server
-			- [ ] create the user 
-			- [ ] Call `uv run gd_guardduty_alerts.py` 
+	- [x] If database file does not exist
+		- [x] Initialize the database 
+		- [x] Start the database server
+			- [x] create the user 
+			- [x] Call `uv run gd_guardduty_alerts.py` 
 				- such that the textual interface is initialized after the user calls `make run`
-			- [ ] handle exiting out of the shell nix in the python file directly 
+			- [x] handle exiting out of the shell nix in the python file directly 
 
 
 Functionality of the selected additions for `gd_guardduty_alerts.py` exists in the dev branch.
