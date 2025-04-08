@@ -18,7 +18,9 @@ Clone the repo and initialize:
     -  Verify installation
        - `nix --version`
     - nix provides a shell environment that allows one to setup and use specified packages, that ends up not messing up the user's existing installs
-     
+
+![Nix Shell](Images/nix-shell.png)     
+
  -  `make run`
 
 In the ensuing nix shell:
