@@ -21,7 +21,8 @@ pkgs.mkShell {
                 cowsay
         	lolcat
                 git
-                coreutils 
+                coreutils
+                less 
 
     ];
  
