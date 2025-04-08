@@ -981,7 +981,7 @@ class SQL_DB:
 
                         if "duplicate key value violates unique constraint" in str(e):
                         
-                            print("Database already populated with values")
+                            print("Database already populated with values for these primary keys")
                         
                         else:
                             
@@ -1039,7 +1039,6 @@ class SQL_DB:
             print("Unable to connect to the database")
         
         else:
-
                         
             if type(options) is list:
                 option = options[0]
