@@ -999,9 +999,18 @@ class SQL_DB:
 
     def print_sql_results(self,results):
 
+        
+        print("-----------------------------------------------------------")
+        
         print("SQL query returned " + str(len(results)))
+        
+        print("-----------------------------------------------------------")
+ 
         for record in results:
+
             print(record)
+            print("-----------------------------------------------------------")
+    
 
     def read_from_sql_db(self,options):
 
