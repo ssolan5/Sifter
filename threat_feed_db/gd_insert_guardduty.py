@@ -1069,7 +1069,7 @@ class SQL_DB:
 
                             case 2:
 
-                                query = cursor.mogrify(sql.SQL("""SELECT DISTINCT COUNT(*) FROM  %(table)s GROUP BY region  \
+                                query = cursor.mogrify(sql.SQL("""SELECT region,COUNT(*) FROM  %(table)s GROUP BY region  \
                                                            """),{ 'table' : AsIs("guardduty_alerts") })
 
                                 cursor.execute(query)
