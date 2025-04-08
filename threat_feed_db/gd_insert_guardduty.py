@@ -791,7 +791,7 @@ class SQL_DB:
                             host=" + self.database_host + "        \
                             port=" + self.database_port
 
-        print(parse_dsn(self.dsn_string))
+        # print(parse_dsn(self.dsn_string))
 
         try:
 
@@ -827,13 +827,47 @@ class SQL_DB:
                     except psycopg2.Error as e:
 
                         print("PostGreSQL Error "+ str(e))
+                        
+                        if "Relation already exists" in str(e):
+                            try:
+                                # Reinitializing the table as we are creating a new
+                                # SQL_DB object that takes in a new file entirely.
+                                # The other alternative method is to just add to the 
+                                # same database 
 
+                                '''
+                                cursor.execute("DROP TABLE guardduty_alerts;")
+                                
+                                cursor.execute("CREATE TABLE guardduty_alerts ("      \
+                                                    "gd_id VARCHAR(255) PRIMARY KEY," \
+                                                    "account_id VARCHAR(255),"        \
+                                                    "region VARCHAR(100),"            \
+                                                    "created_at TIMESTAMP,"           \
+                                                    "updated_at TIMESTAMP,"           \
+                                                    "severity INT,"                   \
+                                                    "public_ip VARCHAR(50),"          \
+                                                    "instance_id VARCHAR(255),"       \
+                                                    "instance_type VARCHAR(100),"     \
+                                                    "iam_arn VARCHAR(255),"           \
+                                                    "iam_id VARCHAR(255),"            \
+                                                    "vpc_id VARCHAR(255),"            \
+                                                    "title VARCHAR(255),"             \
+                                                    "resource_type VARCHAR(100),"     \
+                                                    "description VARCHAR,"            \
+                                                    "additional_data JSONB);")
+                                '''
+                                print("We are adding into the same Database contents of a new file")
+
+                            except psycopg2.Error as e:
+
+                                print("Table guardduty_alerts could not be reinitialized to accept a new file")
 
             self.database_connection.close()
 
 
     def write_into_sql_db(self,sql_record):
 
+        print("Writing into the table")
         modified_sql_record = dict()
 
         for key in sql_record:
@@ -963,6 +997,12 @@ class SQL_DB:
     # this method and it handles writing to the database.
 
 
+    def print_sql_results(self,results):
+
+        print("SQL query returned " + str(len(results)))
+        for record in results:
+            print(record)
+
     def read_from_sql_db(self,options):
 
         # TODO: Retrieve all high security alerts
@@ -1012,7 +1052,7 @@ class SQL_DB:
                                 cursor.execute(query)
                                 results = cursor.fetchall()
 
-                                print(results)
+                                self.print_sql_results(results)
 
                             case 2:
 
@@ -1022,7 +1062,7 @@ class SQL_DB:
                                 cursor.execute(query)
                                 results = cursor.fetchall()
 
-                                print(results)
+                                self.print_sql_results(results)
 
                             case 3:
 
@@ -1031,7 +1071,7 @@ class SQL_DB:
                                 cursor.execute(query)
                                 results = cursor.fetchall()
 
-                                print(results)
+                                self.print_sql_results(results)
 
                             case 4:
 
@@ -1040,7 +1080,7 @@ class SQL_DB:
                                 cursor.execute(query)
                                 results = cursor.fetchall()
 
-                                print(results)
+                                self.print_sql_results(results)
 
                             case 5:
 
@@ -1049,7 +1089,7 @@ class SQL_DB:
                                 cursor.execute(query)
                                 results = cursor.fetchall()
 
-                                print(results)
+                                self.print_sql_results(results)
 
                     except psycopg2.Error as e:
 
@@ -1078,16 +1118,17 @@ def main():
                      " 3. SQL Query for selecting alerts per ip address\n"            \
                      " 4. SQL Query for selecting Title and Descriptions of alerts\n" \
                      " 5. SQL Query for selecting IAM users involved with alerts\n"   \
-                     " 6. Exit menu and close database gracefully...Goodbye! \n"
+                     " 6. Add new entries to the existing table guardduty_alerts\n"   \
+                     " 7. Exit menu and close database gracefully...Goodbye! \n"
 
 
-    while option != 6:
+    while option != 7:
         
         print(welcome_string)
         
         option = int(input("Please enter your option here ----->"))
 
-        if option > 6:
+        if option > 7:
         
             print("-----------------------------------------------------------")
 
@@ -1146,6 +1187,18 @@ def main():
                     print("-----------------------------------------------------------")
 
                 case 6:
+
+                    print("-----------------------------------------------------------")
+
+                    jsonparse_1 = JSONParser("../GuarddutyAlertsSampleData-1/Guardduty Sample Alert Data.json",sql_db)
+                    jsonparse_1.read_from_file()
+
+
+                    print("-----------------------------------------------------------")
+
+
+
+                case 7:
 
                     print("-----------------------------------------------------------")
 

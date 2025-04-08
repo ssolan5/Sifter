@@ -27,6 +27,7 @@ pkgs.mkShell {
  
     GREETING = " Hello World!! ^--^ !! ! ";
     ALERTS_REPO = "GuarddutyAlertsSampleData/";
+    ALERTS_REPO_1 = "GuarddutyAlertsSampleData-1/";
     DB_DIR=".tmp/db";
     PGDATA="";
 
@@ -55,13 +56,14 @@ pkgs.mkShell {
       # Cloning the Guard Duty Sample Alerts JSON repo
       # Checking if the alerts repo is already there
  
-      if test -d "$ALERTS_REPO"; then 
+      if test -d "$ALERTS_REPO" || test -d "$ALERTS_REPO_1" ; then 
 
           echo "GuarddutyAlertsSampleData exists!" | cowsay -f hellokitty | lolcat
 
       else 
 
           git clone https://github.com/vkatariaairisec/GuarddutyAlertsSampleData.git
+          git clone https://github.com/ssolan5/GuarddutyAlertsSampleData-1.git
 
       fi
 
