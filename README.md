@@ -1,5 +1,5 @@
 # Sifter
-a Python script that reads AWS GuardDuty alerts stored as JSON files, extracts relevant fields, and inserts the data into a PostgreSQL database.
+A Python script that reads AWS GuardDuty alerts stored as JSON files, extracts relevant fields, and inserts the data into a PostgreSQL database.
 
 Please note: No LLMs were used to generate this code, have coded this project entirely by myself in vim.
 
