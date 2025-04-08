@@ -2,7 +2,7 @@
 
 
 run:
-	nix-shell
+	nix-shell --pure
 
 clean:
 	rm -rf .tmp
