@@ -34,25 +34,26 @@ pkgs.mkShell {
     shellHook = ''
 
       COMMAND_OUTPUT=$(uv init threat_feed_db 2>&1)
-
+      
       if [[ $? -eq 0 ]]; then
+            
+            # If the command has an exit status of 0 that implies 
+            # that the uv init occurred successfully, i.e the toml 
+            # file for uv project has already been initialized with
+            # required dependencies.
  
             cd threat_feed_db
             uv add psycopg2-binary
  
             # Exiting out of the uv repo after adding dependencies
 	    cd ..
- 
-
-      # else 
-
-            # echo "$COMMAND_OUTPUT" | cowsay -f hellokitty | lolcat 
 
       fi
 
       echo $GREETING | cowsay -f hellokitty | lolcat
  
-      # Cloning the Guard Duty sample alerts json repo
+      # Cloning the Guard Duty Sample Alerts JSON repo
+      # Checking if the alerts repo is already there
  
       if test -d "$ALERTS_REPO"; then 
 
@@ -74,8 +75,6 @@ pkgs.mkShell {
           echo "Database is already initialized so not creating again" | cowsay -f hellokitty | lolcat
 	  # checkCommand=$(pg_ctl -D . stop)
           # if [[ $checkCommand == "*Is server running?*" ]]
- 
-
 
       else
 
@@ -94,12 +93,10 @@ pkgs.mkShell {
           # Check if that port is not already being used for PGSQL 
           # connections or a remnant from before -- test runs  
 
-          echo "Checking if someone is already using the socket for the server" | cowsay -f hellokitty | lolcat
+          # echo "Checking if someone is already using the socket for the server" | cowsay -f hellokitty | lolcat
 
           # checkCommand=$(pg_ctl -D . stop)
           # if [[ $checkCommand == "*Is server running?* || $checkCommand == "*server stopped*" ]]
-
-
           echo "PostgreSQL Server starting ! !! " | cowsay -f hellokitty | lolcat 
 
 	  # Starts a PostGreSQL server 
